@@ -242,7 +242,6 @@ export default function Home() {
 
       <Footer />
 
-      {/* Settings gear */}
       <button
         onClick={() => setShowSettings(true)}
         className="fixed bottom-6 right-6 z-50 flex size-10 items-center justify-center rounded-full bg-zinc-900/80 text-zinc-400 backdrop-blur-sm transition-colors hover:text-zinc-50"
@@ -251,7 +250,6 @@ export default function Home() {
         <Settings size={20} />
       </button>
 
-      {/* Settings modal */}
       {showSettings && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
           <motion.div

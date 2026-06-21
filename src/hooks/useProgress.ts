@@ -64,7 +64,6 @@ function writeStorage(data: ProgressData): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   } catch {
-    /* noop */
   }
 }
 
@@ -117,7 +116,6 @@ export function useProgress() {
   }, []);
 
   const setCurrentModule = useCallback((_moduleId: string) => {
-    /* kept for API compatibility */
   }, []);
 
   const resetProgress = useCallback(() => {

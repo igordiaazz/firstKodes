@@ -183,7 +183,6 @@ export default function GameLevel({
 
   return (
     <div className="relative mx-auto flex min-h-screen w-full max-w-lg flex-col overflow-x-hidden bg-zinc-950 px-6">
-      {/* Header */}
       <header className="flex items-center gap-2 pt-6 pb-4 md:gap-4">
         <div className="flex-1">
           <div className="mb-1.5 flex items-center justify-between text-xs text-zinc-500">
@@ -223,7 +222,6 @@ export default function GameLevel({
         </button>
       </header>
 
-      {/* Tutor Area */}
       <motion.div
         key={level.id}
         initial={{ opacity: 0, y: 20 }}
@@ -242,7 +240,6 @@ export default function GameLevel({
         </div>
       </motion.div>
 
-      {/* Code Zone */}
       <motion.div
         key={`code-${level.id}`}
         initial={{ opacity: 0, y: 12 }}
@@ -277,7 +274,6 @@ export default function GameLevel({
         </code>
       </motion.div>
 
-      {/* Chip Bank */}
       <div className="mb-auto flex flex-wrap gap-2">
         {level.options.map((word, idx) => (
           <motion.button
@@ -298,7 +294,6 @@ export default function GameLevel({
         ))}
       </div>
 
-      {/* Feedback */}
       <AnimatePresence>
         {feedback !== 'idle' && (
           <motion.div
@@ -321,7 +316,6 @@ export default function GameLevel({
         )}
       </AnimatePresence>
 
-      {/* Verify Button */}
       <div className="pb-8">
         <motion.button
           initial={{ opacity: 0, y: 10 }}

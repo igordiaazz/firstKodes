@@ -165,7 +165,6 @@ export default function Carousel({
 
   return (
     <>
-      {/* Gamification Badges */}
       <div className="fixed top-6 right-4 z-50 sm:right-8">
         <div className="flex items-center gap-1.5 rounded-full bg-zinc-900/80 px-3 py-1.5 backdrop-blur-sm">
           <Flame size={18} className="text-orange-500" />
@@ -174,7 +173,6 @@ export default function Carousel({
       </div>
 
     <div className="relative mx-auto flex w-full max-w-6xl items-center px-4 sm:px-12">
-      {/* Previous Button */}
       <button
         onClick={previous}
         disabled={focusedIndex === 0}
@@ -186,7 +184,6 @@ export default function Carousel({
         <ChevronLeft size={28} />
       </button>
 
-      {/* Cards Area */}
       <div
         ref={containerRef}
         onPointerDown={handlePointerDown}
@@ -335,7 +332,6 @@ export default function Carousel({
         </AnimatePresence>
       </div>
 
-      {/* Next Button */}
       <button
         onClick={next}
         disabled={focusedIndex === modules.length - 1}
@@ -347,7 +343,6 @@ export default function Carousel({
         <ChevronRight size={28} />
       </button>
 
-      {/* Mobile nav buttons (absolutely positioned over edges) */}
       <div className="absolute inset-y-0 left-0 flex items-center sm:hidden">
         <button
           onClick={previous}

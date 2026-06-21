@@ -107,7 +107,6 @@ export default function BossPhase({
         </button>
       </header>
 
-      {/* Enunciado */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -117,7 +116,6 @@ export default function BossPhase({
         <p className="text-sm leading-relaxed text-zinc-300">{question}</p>
       </motion.div>
 
-      {/* Área de Digitação */}
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
@@ -134,7 +132,6 @@ export default function BossPhase({
         />
       </motion.div>
 
-      {/* Clippy Feedback */}
       {clippyFeedback && (
         <motion.div
           initial={{ opacity: 0, y: 10 }}
@@ -145,7 +142,6 @@ export default function BossPhase({
         </motion.div>
       )}
 
-      {/* Botão Testar */}
       <div className="pb-8">
         <motion.button
           initial={{ opacity: 0, y: 10 }}
