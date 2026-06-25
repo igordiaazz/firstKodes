@@ -1,7 +1,7 @@
 'use client';
 
 import { AnimatePresence, motion } from 'framer-motion';
-import { Bot, Heart, X } from 'lucide-react';
+import { Bot, Heart, Loader2, X } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import BossPhase from '@/components/BossPhase';
 import { getModuleNumber } from '@/hooks/useProgress';
@@ -62,14 +62,16 @@ export default function GameLevel({
     return practiceQuestions.map((q, i) => {
       const snippet = q.codeSnippet ?? '';
       const parts = snippet.split('[ _____ ]');
-      return {
+      const data: LevelData = {
         id: `practice-${i}`,
+        type: q.type,
         clippyText: q.context,
         codePrefix: parts[0] ?? '',
-        codeSuffix: parts[1] ?? '',
+        codeSuffix: snippet.includes('[ _____ ]') ? (parts[1] ?? '') : '',
         options: q.options,
         answer: q.correctAnswer,
       };
+      return data;
     });
   }, [practiceQuestions, propLevels]);
 
@@ -80,6 +82,7 @@ export default function GameLevel({
   const [selectedWord, setSelectedWord] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<'idle' | 'success' | 'error'>('idle');
   const [mascotMessage, setMascotMessage] = useState<string | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
   const isBossPhase = !practiceQuestions && currentLevelIndex >= levels.length;
   const bossChallenge = practiceQuestions ? undefined : BOSS_CHALLENGES[moduleId];
   const level = levels[currentLevelIndex];
@@ -88,11 +91,46 @@ export default function GameLevel({
   const progressPercent = ((currentLevelIndex + 1) / totalPhases) * 100;
 
   useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
     if (isBossPhase) return;
     setSelectedWord(null);
     setFeedback('idle');
     setMascotMessage(null);
   }, [currentLevelIndex, isBossPhase]);
+
+  if (!isMounted) {
+    return (
+      <div className="relative mx-auto flex min-h-screen w-full max-w-lg flex-col overflow-x-hidden bg-zinc-950 px-6">
+        <header className="flex items-center gap-2 pt-6 pb-4 md:gap-4">
+          <div className="flex-1">
+            <div className="mb-1.5">
+              <div className="h-3 w-20 animate-pulse rounded bg-zinc-800" />
+            </div>
+            <div className="h-1 overflow-hidden rounded-full bg-zinc-800">
+              <div className="h-full w-0 rounded-full bg-purple-500" />
+            </div>
+          </div>
+          <div className="flex size-8 items-center justify-center rounded-full bg-zinc-800" />
+        </header>
+        <div className="mb-6 flex items-start gap-3">
+          <div className="size-12 shrink-0 animate-pulse rounded-xl bg-zinc-800" />
+          <div className="h-16 flex-1 animate-pulse rounded-2xl rounded-tl-sm bg-zinc-800" />
+        </div>
+        <div className="mb-8 h-24 animate-pulse rounded-xl bg-zinc-900" />
+        <div className="mb-auto flex flex-wrap gap-2">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-10 w-24 animate-pulse rounded-lg bg-zinc-800" />
+          ))}
+        </div>
+        <div className="pb-8">
+          <div className="h-14 w-full animate-pulse rounded-xl bg-zinc-800" />
+        </div>
+      </div>
+    );
+  }
 
   const handleChipClick = (word: string) => {
     setSelectedWord(word);
@@ -174,7 +212,6 @@ export default function GameLevel({
           setTimeout(() => onExit(), 1500);
         }}
         onExit={() => {
-          onComplete(moduleId, totalPhases);
           onExit();
         }}
       />
@@ -240,39 +277,57 @@ export default function GameLevel({
         </div>
       </motion.div>
 
-      <motion.div
-        key={`code-${level.id}`}
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.35 }}
-        className="mb-8 overflow-x-auto rounded-xl bg-zinc-900 p-5 font-mono text-base leading-relaxed"
-      >
-        <code className="whitespace-pre-wrap">
-          {level.codePrefix}<AnimatePresence mode="wait">
-            {selectedWord ? (
-              <motion.span
-                key={selectedWord}
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.8, opacity: 0 }}
-                className="rounded-md bg-purple-600/20 px-2.5 py-0.5 font-semibold text-purple-400"
-              >
-                {selectedWord}
-              </motion.span>
-            ) : (
-              <motion.span
-                key="empty"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="rounded-md bg-zinc-800 px-2.5 py-0.5 text-zinc-500"
-              >
-                Espaço Vazio
-              </motion.span>
-            )}
-          </AnimatePresence>{level.codeSuffix}
-        </code>
-      </motion.div>
+      {level.type === 'output' ? (
+        <motion.div
+          key={`code-${level.id}`}
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.35 }}
+          className="mb-6 overflow-x-auto rounded-xl bg-zinc-900 p-5 font-mono text-sm leading-relaxed"
+        >
+          <code className="whitespace-pre-wrap">{level.codePrefix}</code>
+        </motion.div>
+      ) : (
+        <motion.div
+          key={`code-${level.id}`}
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.35 }}
+          className="mb-8 overflow-x-auto rounded-xl bg-zinc-900 p-5 font-mono text-base leading-relaxed"
+        >
+          <code className="whitespace-pre-wrap">
+            {level.codePrefix}<AnimatePresence mode="wait">
+              {selectedWord ? (
+                <motion.span
+                  key={selectedWord}
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.8, opacity: 0 }}
+                  className="rounded-md bg-purple-600/20 px-2.5 py-0.5 font-semibold text-purple-400"
+                >
+                  {selectedWord}
+                </motion.span>
+              ) : (
+                <motion.span
+                  key="empty"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="rounded-md bg-zinc-800 px-2.5 py-0.5 font-mono text-zinc-500"
+                >
+                  _____
+                </motion.span>
+              )}
+            </AnimatePresence>{level.codeSuffix}
+          </code>
+        </motion.div>
+      )}
+
+      {level.type === 'output' && (
+        <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-zinc-500">
+          Saída:
+        </div>
+      )}
 
       <div className="mb-auto flex flex-wrap gap-2">
         {level.options.map((word, idx) => (

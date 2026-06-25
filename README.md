@@ -34,10 +34,10 @@
 
 ## Funcionalidades
 
-- 🎮 **Fases Interativas** — Complete códigos selecionando palavras-chave
+- 🎮 **Fases Interativas** — Complete códigos selecionando palavras-chave ou descubra a saída do código
 - ❤️ **Sistema de Vidas** — 3 vidas por módulo; erre e aprenda com o feedback
 - 💾 **Progresso Persistente** — Salvo no `localStorage` com streaks e desbloqueio progressivo
-- 🤖 **Modo Prática** — Gera 5 questões personalizadas por módulo via IA
+- 🤖 **Modo Prática** — Gera 5 questões personalizadas por módulo via IA (completar código ou prever saída)
 - 👑 **Desafio Chefão** — Fase final com editor de código livre e tutoria do Clippy
 - 🦎 **Tutor IA (Clippy)** — Feedback contextual que se adapta ao número de vidas restantes
 - 🎠 **Carrossel de Módulos** — Navegação intuitiva com animações suaves

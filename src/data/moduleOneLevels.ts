@@ -1,5 +1,6 @@
 export interface LevelData {
   id: string;
+  type?: 'complete' | 'output';
   clippyText: string;
   codePrefix: string;
   codeSuffix: string;
@@ -43,5 +44,15 @@ export const moduleOneLevels: LevelData[] = [
     codeSuffix: ' = 20',
     options: ['novo_ponto', '20', 'pontos'],
     answer: 'pontos',
+  },
+  {
+    id: 'fase-5',
+    type: 'output',
+    clippyText:
+      'Qual ser\u00e1 o resultado exibido na tela?',
+    codePrefix: 'print(8 - 3)',
+    codeSuffix: '',
+    options: ['83', '5', '8 - 3'],
+    answer: '5',
   },
 ];

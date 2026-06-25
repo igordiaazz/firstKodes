@@ -7,6 +7,7 @@ interface GeneratePracticeRequest {
 }
 
 export interface PracticeQuestion {
+  type: 'complete' | 'output';
   context: string;
   codeSnippet: string;
   options: string[];
@@ -31,13 +32,28 @@ Retorne EXCLUSIVAMENTE um JSON válido neste formato:
   "practiceName": "Nome divertido para a sessão",
   "questions": [
     {
+      "type": "complete",
       "context": "Texto curto da historinha/enunciado",
-      "codeSnippet": "Código Python com uma lacuna [ _____ ] ou pedindo o resultado (opcional)",
+      "codeSnippet": "Código Python com uma lacuna [ _____ ] no local a ser preenchido",
+      "options": ["opcao 1", "opcao 2", "opcao 3"],
+      "correctAnswer": "A opção correta exatamente como escrita na lista"
+    },
+    {
+      "type": "output",
+      "context": "Texto curto da historinha/enunciado",
+      "codeSnippet": "Código Python completo (sem [ _____ ]), o usuário deve prever a saída",
       "options": ["opcao 1", "opcao 2", "opcao 3"],
       "correctAnswer": "A opção correta exatamente como escrita na lista"
     }
   ]
-}`;
+}
+
+REGRAS IMPORTANTES:
+- type "complete": o codeSnippet DEVE conter [ _____ ] no local onde o usuário deve completar o código (ex: "print([ _____ ])")
+- type "output": o codeSnippet NÃO DEVE conter [ _____ ], mostre o código completo
+- Use type "output" para perguntas como: "O que esse código imprime?", "Qual o valor final de x?"
+- Use type "complete" para perguntas como: "Qual comando completa o código?", "Preencha a lacuna"
+- Misture os dois tipos nas 5 questões: 2-3 do tipo "complete" e 2-3 do tipo "output"`;
 
 export async function POST(request: NextRequest) {
   try {
@@ -110,7 +126,44 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    return NextResponse.json(parsed);
+    const validQuestions: PracticeQuestion[] = [];
+
+    for (const q of parsed.questions) {
+      if (
+        (q.type === 'complete' || q.type === 'output') &&
+        typeof q.context === 'string' &&
+        typeof q.codeSnippet === 'string' &&
+        Array.isArray(q.options) &&
+        q.options.length >= 2 &&
+        typeof q.correctAnswer === 'string'
+      ) {
+        if (q.type === 'complete' && !q.codeSnippet.includes('[ _____ ]')) {
+          continue;
+        }
+        if (q.type === 'output' && q.codeSnippet.includes('[ _____ ]')) {
+          continue;
+        }
+        validQuestions.push({
+          type: q.type,
+          context: q.context.trim(),
+          codeSnippet: q.codeSnippet.trim(),
+          options: q.options.map((o: string) => o.trim()),
+          correctAnswer: q.correctAnswer.trim(),
+        });
+      }
+    }
+
+    if (validQuestions.length === 0) {
+      return NextResponse.json(
+        { error: 'Nenhuma questão válida foi gerada. Tente novamente.' },
+        { status: 502 },
+      );
+    }
+
+    return NextResponse.json({
+      practiceName: parsed.practiceName,
+      questions: validQuestions,
+    });
   } catch (error) {
     return NextResponse.json(
       { error: 'Erro interno do servidor. Tente novamente.' },

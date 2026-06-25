@@ -172,25 +172,14 @@ export default function Carousel({
         </div>
       </div>
 
-    <div className="relative mx-auto flex w-full max-w-6xl items-center px-4 sm:px-12">
-      <button
-        onClick={previous}
-        disabled={focusedIndex === 0}
-        aria-label="Módulo anterior"
-        className={`z-10 hidden shrink-0 items-center justify-center rounded-full bg-zinc-800 p-2 text-purple-500 transition-all hover:bg-zinc-700 hover:text-purple-400 disabled:pointer-events-none disabled:opacity-30 sm:flex ${
-          focusedIndex === 0 ? 'opacity-30' : ''
-        }`}
-      >
-        <ChevronLeft size={28} />
-      </button>
-
+    <div className="relative mx-auto flex w-full max-w-md flex-col items-center px-0">
       <div
         ref={containerRef}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerLeave={handlePointerUp}
-        className="relative mx-0 flex w-full items-center justify-center overflow-visible py-8 sm:mx-4"
+        className="relative flex w-full items-center justify-center overflow-visible py-8"
         style={{ minHeight: 464, touchAction: 'pan-y' }}
       >
         <AnimatePresence mode="popLayout">
@@ -332,35 +321,25 @@ export default function Carousel({
         </AnimatePresence>
       </div>
 
-      <button
-        onClick={next}
-        disabled={focusedIndex === modules.length - 1}
-        aria-label="Próximo módulo"
-        className={`z-10 hidden shrink-0 items-center justify-center rounded-full bg-zinc-800 p-2 text-purple-500 transition-all hover:bg-zinc-700 hover:text-purple-400 disabled:pointer-events-none disabled:opacity-30 sm:flex ${
-          focusedIndex === modules.length - 1 ? 'opacity-30' : ''
-        }`}
-      >
-        <ChevronRight size={28} />
-      </button>
-
-      <div className="absolute inset-y-0 left-0 flex items-center sm:hidden">
+      <div className="flex items-center gap-6 pb-4">
         <button
           onClick={previous}
           disabled={focusedIndex === 0}
           aria-label="Módulo anterior"
-          className="flex size-10 items-center justify-center rounded-full bg-zinc-800/80 text-purple-500 backdrop-blur-sm disabled:opacity-20"
+          className="text-zinc-600 transition-colors hover:text-zinc-300 disabled:pointer-events-none disabled:opacity-20"
         >
-          <ChevronLeft size={24} />
+          <ChevronLeft size={20} />
         </button>
-      </div>
-      <div className="absolute inset-y-0 right-0 flex items-center sm:hidden">
+        <span className="text-xs text-zinc-600">
+          {focusedIndex + 1} / {modules.length}
+        </span>
         <button
           onClick={next}
           disabled={focusedIndex === modules.length - 1}
           aria-label="Próximo módulo"
-          className="flex size-10 items-center justify-center rounded-full bg-zinc-800/80 text-purple-500 backdrop-blur-sm disabled:opacity-20"
+          className="text-zinc-600 transition-colors hover:text-zinc-300 disabled:pointer-events-none disabled:opacity-20"
         >
-          <ChevronRight size={24} />
+          <ChevronRight size={20} />
         </button>
       </div>
     </div>

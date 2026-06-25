@@ -152,6 +152,16 @@ export default function Home() {
     [completePhase],
   );
 
+  if (!hydrated) {
+    return (
+      <div className="flex min-h-screen w-full flex-col items-center justify-center overflow-x-hidden bg-zinc-950 px-4">
+        <div className="flex size-12 items-center justify-center rounded-xl bg-purple-600/20">
+          <Loader2 size={28} className="animate-spin text-purple-400" />
+        </div>
+      </div>
+    );
+  }
+
   if (view === 'game' && activeModuleId && LEVELS_MAP[activeModuleId]) {
     const levels = LEVELS_MAP[activeModuleId];
     const saved = progress.phasesCompleted[activeModuleId] ?? 0;
