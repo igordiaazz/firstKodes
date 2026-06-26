@@ -16,11 +16,22 @@ export function getModuleNumber(id: string): number {
   return MODULE_NUMBERS[id] ?? 0;
 }
 
+export function formatElapsedTime(ms: number): string {
+  const totalSeconds = Math.floor(ms / 1000);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  if (minutes > 0) {
+    return `${minutes}m ${seconds.toString().padStart(2, '0')}s`;
+  }
+  return `${seconds}s`;
+}
+
 export interface ProgressData {
   lives: number;
   unlockedModules: number[];
   phasesCompleted: Record<string, number>;
   streak: number;
+  moduleStartTime: number;
 }
 
 function getDefaultProgress(): ProgressData {
@@ -29,6 +40,7 @@ function getDefaultProgress(): ProgressData {
     unlockedModules: [1],
     phasesCompleted: {},
     streak: 0,
+    moduleStartTime: 0,
   };
 }
 
@@ -46,6 +58,7 @@ function readStorage(): ProgressData {
           : [1],
         phasesCompleted: parsed.phasesCompleted || {},
         streak: typeof parsed.streak === 'number' ? parsed.streak : 0,
+        moduleStartTime: typeof parsed.moduleStartTime === 'number' ? parsed.moduleStartTime : 0,
       };
     }
     const legacy = parsed as Record<string, number>;
@@ -54,6 +67,7 @@ function readStorage(): ProgressData {
       unlockedModules: [1],
       phasesCompleted: legacy,
       streak: 0,
+      moduleStartTime: 0,
     };
   } catch {
     return getDefaultProgress();
@@ -118,6 +132,10 @@ export function useProgress() {
   const setCurrentModule = useCallback((_moduleId: string) => {
   }, []);
 
+  const setModuleStartTime = useCallback((time: number) => {
+    setProgress((prev) => ({ ...prev, moduleStartTime: time }));
+  }, []);
+
   const resetProgress = useCallback(() => {
     setProgress(getDefaultProgress());
   }, []);
@@ -129,6 +147,7 @@ export function useProgress() {
     completePhase,
     completeModule,
     setCurrentModule,
+    setModuleStartTime,
     resetProgress,
   };
 }

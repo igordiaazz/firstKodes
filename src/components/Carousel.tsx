@@ -7,7 +7,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Code,
-  Flame,
   GitBranch,
   Heart,
   Lock,
@@ -67,14 +66,12 @@ const MOCK_MODULES: ModuleData[] = [
 
 export interface CarouselProps {
   modules?: ModuleData[];
-  streak: number;
   onStartModule?: (moduleId: string) => void;
   onPracticeModule?: (moduleId: string) => void;
 }
 
 export default function Carousel({
   modules: externalModules,
-  streak,
   onStartModule,
   onPracticeModule,
 }: CarouselProps) {
@@ -164,14 +161,6 @@ export default function Carousel({
   };
 
   return (
-    <>
-      <div className="fixed top-6 right-4 z-50 sm:right-8">
-        <div className="flex items-center gap-1.5 rounded-full bg-zinc-900/80 px-3 py-1.5 backdrop-blur-sm">
-          <Flame size={18} className="text-orange-500" />
-          <span className="text-sm font-semibold text-zinc-50">{streak}</span>
-        </div>
-      </div>
-
     <div className="relative mx-auto flex w-full max-w-md flex-col items-center px-0">
       <div
         ref={containerRef}
@@ -343,6 +332,5 @@ export default function Carousel({
         </button>
       </div>
     </div>
-    </>
   );
 }

@@ -1,12 +1,13 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Braces, Code, GitBranch, Loader2, Repeat, Settings, Terminal, X } from 'lucide-react';
+import { Braces, Code, Flame, GitBranch, Loader2, Repeat, Settings, Terminal, X } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Carousel from '@/components/Carousel';
 import Footer from '@/components/Footer';
 import GameLevel, { BOSS_CHALLENGES } from '@/components/GameLevel';
 import StreakCelebration from '@/components/StreakCelebration';
+import ModuleComplete from '@/components/ModuleComplete';
 import { moduleOneLevels } from '@/data/moduleOneLevels';
 import {
   moduleTwoLevels,
@@ -66,6 +67,7 @@ export default function Home() {
   const [activeModuleId, setActiveModuleId] = useState<string | null>(null);
   const [showSettings, setShowSettings] = useState(false);
   const [showStreakCelebration, setShowStreakCelebration] = useState(false);
+  const [elapsedTime, setElapsedTime] = useState<number | null>(null);
   const [practiceQuestions, setPracticeQuestions] = useState<PracticeQuestion[] | null>(null);
   const [practiceLoading, setPracticeLoading] = useState(false);
   const [practiceError, setPracticeError] = useState<string | null>(null);
@@ -75,6 +77,7 @@ export default function Home() {
     hydrated,
     completePhase,
     completeModule,
+    setModuleStartTime,
     resetProgress,
   } = useProgress();
 
@@ -85,10 +88,13 @@ export default function Home() {
       return;
     }
     if (prevStreakRef.current === 0 && progress.streak === 1) {
+      if (elapsedTime !== null) {
+        return;
+      }
       setShowStreakCelebration(true);
     }
     prevStreakRef.current = progress.streak;
-  }, [progress.streak, hydrated]);
+  }, [progress.streak, hydrated, elapsedTime]);
 
   const modules: ModuleData[] = useMemo(
     () =>
@@ -109,7 +115,14 @@ export default function Home() {
     setActiveModuleId(moduleId);
     setPracticeQuestions(null);
     setView('game');
-  }, []);
+    setModuleStartTime(Date.now());
+  }, [setModuleStartTime]);
+
+  const handleModuleCompleted = useCallback(() => {
+    if (progress.moduleStartTime > 0) {
+      setElapsedTime(Date.now() - progress.moduleStartTime);
+    }
+  }, [progress.moduleStartTime]);
 
   const handlePracticeModule = useCallback(async (moduleId: string) => {
     setActiveModuleId(moduleId);
@@ -117,6 +130,7 @@ export default function Home() {
     setPracticeError(null);
     setPracticeLoading(true);
     setView('game');
+    setModuleStartTime(Date.now());
 
     try {
       const res = await fetch('/api/generate-practice', {
@@ -136,7 +150,7 @@ export default function Home() {
     } finally {
       setPracticeLoading(false);
     }
-  }, []);
+  }, [setModuleStartTime]);
 
   const handleExitGame = useCallback(() => {
     setActiveModuleId(null);
@@ -207,16 +221,31 @@ export default function Home() {
       );
     }
 
+    const moduleTitle = MODULES_META.find(m => m.id === activeModuleId)?.title ?? '';
     return (
-      <GameLevel
-        levels={levels}
-        moduleId={activeModuleId}
-        savedProgress={saved}
-        practiceQuestions={practiceQuestions}
-        onExit={handleExitGame}
-        onComplete={handleComplete}
-        onModuleComplete={completeModule}
-      />
+      <>
+        <GameLevel
+          levels={levels}
+          moduleId={activeModuleId}
+          savedProgress={saved}
+          practiceQuestions={practiceQuestions}
+          onExit={handleExitGame}
+          onComplete={handleComplete}
+          onModuleComplete={completeModule}
+          onModuleCompleted={handleModuleCompleted}
+        />
+        {elapsedTime !== null && (
+          <ModuleComplete
+            elapsedMs={elapsedTime}
+            moduleTitle={moduleTitle}
+            isPractice={!!practiceQuestions}
+            onClose={() => {
+              setElapsedTime(null);
+              handleExitGame();
+            }}
+          />
+        )}
+      </>
     );
   }
 
@@ -228,7 +257,7 @@ export default function Home() {
             <div className="flex size-12 items-center justify-center rounded-xl bg-purple-600/20">
               <Terminal size={28} className="text-purple-400" />
             </div>
-            <h1 className="text-3xl font-extrabold tracking-tight text-zinc-50 sm:text-4xl">
+            <h1 className="text-3xl font-extrabold tracking-tight text-zinc-50 sm:text-4xl" style={{ fontFamily: 'var(--font-mono-coding)' }}>
               first<span className="text-purple-400">Kodes</span>
             </h1>
           </div>
@@ -237,12 +266,13 @@ export default function Home() {
           </p>
         </div>
 
-        <Carousel
-          modules={modules}
-          streak={progress.streak}
-          onStartModule={handleStartModule}
-          onPracticeModule={handlePracticeModule}
-        />
+        <div>
+          <Carousel
+            modules={modules}
+            onStartModule={handleStartModule}
+            onPracticeModule={handlePracticeModule}
+          />
+        </div>
 
         <StreakCelebration
           show={showStreakCelebration}
@@ -250,15 +280,25 @@ export default function Home() {
         />
       </div>
 
-      <Footer />
+      <footer>
+        <Footer />
+      </footer>
 
-      <button
-        onClick={() => setShowSettings(true)}
-        className="fixed bottom-6 right-6 z-50 flex size-10 items-center justify-center rounded-full bg-zinc-900/80 text-zinc-400 backdrop-blur-sm transition-colors hover:text-zinc-50"
-        aria-label="Configurações"
-      >
-        <Settings size={20} />
-      </button>
+      <div className="fixed top-4 right-4 z-50 sm:top-6 sm:right-8">
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 rounded-full bg-zinc-900/80 px-2.5 py-1 backdrop-blur-sm sm:px-3 sm:py-1.5">
+            <Flame size={16} className="text-orange-500 sm:size-[18px]" />
+            <span className="text-xs font-semibold text-zinc-50 sm:text-sm">{progress.streak}</span>
+          </div>
+          <button
+            onClick={() => setShowSettings(true)}
+            className="flex size-8 items-center justify-center rounded-full bg-zinc-900/80 text-zinc-400 backdrop-blur-sm transition-colors hover:text-zinc-50 sm:size-10"
+            aria-label="Configurações"
+          >
+            <Settings size={16} className="sm:size-5" />
+          </button>
+        </div>
+      </div>
 
       {showSettings && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">

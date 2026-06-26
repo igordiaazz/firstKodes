@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion } from 'framer-motion';
 import { Bot, Heart, Loader2, X } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import BossPhase from '@/components/BossPhase';
 import { getModuleNumber } from '@/hooks/useProgress';
 import type { LevelData } from '@/data/moduleOneLevels';
@@ -46,6 +46,7 @@ interface GameLevelProps {
   onExit: () => void;
   onComplete: (moduleId: string, phasesCompleted: number) => void;
   onModuleComplete?: (moduleId: number) => void;
+  onModuleCompleted?: () => void;
 }
 
 export default function GameLevel({
@@ -56,6 +57,7 @@ export default function GameLevel({
   onExit,
   onComplete,
   onModuleComplete,
+  onModuleCompleted,
 }: GameLevelProps) {
   const levels = useMemo(() => {
     if (!practiceQuestions) return propLevels;
@@ -100,6 +102,15 @@ export default function GameLevel({
     setFeedback('idle');
     setMascotMessage(null);
   }, [currentLevelIndex, isBossPhase]);
+
+  const hasCalledPracticeRef = useRef(false);
+
+  useLayoutEffect(() => {
+    if (practiceQuestions && currentLevelIndex >= levels.length && !hasCalledPracticeRef.current) {
+      hasCalledPracticeRef.current = true;
+      onModuleCompleted?.();
+    }
+  }, [practiceQuestions, currentLevelIndex, levels.length, onModuleCompleted]);
 
   if (!isMounted) {
     return (
@@ -174,31 +185,7 @@ export default function GameLevel({
   };
 
   if (practiceQuestions && currentLevelIndex >= levels.length) {
-    return (
-      <div className="flex min-h-screen w-full flex-col items-center justify-center overflow-x-hidden bg-zinc-950 px-6">
-        <motion.div
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          className="text-center"
-        >
-          <div className="mx-auto mb-6 flex size-20 items-center justify-center rounded-full bg-purple-600/20">
-            <Bot size={40} className="text-purple-400" />
-          </div>
-          <h2 className="mb-2 text-2xl font-bold text-zinc-50">
-            Prática Concluída!
-          </h2>
-          <p className="mb-8 text-zinc-400">
-            Você completou as 5 fases extras.
-          </p>
-          <button
-            onClick={onExit}
-            className="rounded-xl bg-purple-600 px-8 py-3 text-base font-bold text-white shadow-lg shadow-purple-600/25 transition-all hover:bg-purple-500 active:scale-[0.98]"
-          >
-            Voltar ao Início
-          </button>
-        </motion.div>
-      </div>
-    );
+    return null;
   }
 
   if (isBossPhase && bossChallenge) {
@@ -209,7 +196,7 @@ export default function GameLevel({
         onComplete={() => {
           onComplete(moduleId, totalPhases);
           onModuleComplete?.(getModuleNumber(moduleId));
-          setTimeout(() => onExit(), 1500);
+          onModuleCompleted?.();
         }}
         onExit={() => {
           onExit();
