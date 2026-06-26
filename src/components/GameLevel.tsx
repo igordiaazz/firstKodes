@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Bot, Heart, Loader2, X } from 'lucide-react';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import BossPhase from '@/components/BossPhase';
+import { cn } from '@/lib/utils';
 import { getModuleNumber } from '@/hooks/useProgress';
 import type { LevelData } from '@/data/moduleOneLevels';
 import type { PracticeQuestion } from '@/app/api/generate-practice/route';
@@ -214,18 +215,30 @@ export default function GameLevel({
               Fase {displayPhase} de {totalPhases}
             </span>
             <div className="flex items-center gap-1">
-              {[1, 2, 3].map((i) => (
-                <Heart
-                  key={i}
-                  size={16}
-                  className={
-                    i <= moduleLives
-                      ? 'text-red-400'
-                      : 'text-zinc-700'
-                  }
-                  fill={i <= moduleLives ? 'currentColor' : 'none'}
-                />
-              ))}
+              <AnimatePresence mode="wait">
+                {[1, 2, 3].map((i) => (
+                  <motion.div
+                    key={i}
+                    initial={i > moduleLives ? { scale: 1, opacity: 1 } : false}
+                    animate={
+                      i > moduleLives
+                        ? { scale: 0, opacity: 0 }
+                        : { scale: 1, opacity: 1 }
+                    }
+                    transition={{ duration: 0.3, ease: 'easeOut' }}
+                  >
+                    <Heart
+                      size={16}
+                      className={
+                        i <= moduleLives
+                          ? 'text-red-400'
+                          : 'text-zinc-700'
+                      }
+                      fill={i <= moduleLives ? 'currentColor' : 'none'}
+                    />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
             </div>
           </div>
           <div className="h-1 overflow-hidden rounded-full bg-zinc-800">
@@ -270,9 +283,9 @@ export default function GameLevel({
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.35 }}
-          className="mb-6 overflow-x-auto rounded-xl bg-zinc-900 p-5 font-mono text-sm leading-relaxed"
+          className="mb-6 overflow-x-auto rounded-xl border border-zinc-800 bg-zinc-900/80 p-5 font-mono text-sm leading-relaxed"
         >
-          <code className="whitespace-pre-wrap">{level.codePrefix}</code>
+          <code className="whitespace-pre-wrap text-zinc-200">{level.codePrefix}</code>
         </motion.div>
       ) : (
         <motion.div
@@ -280,17 +293,20 @@ export default function GameLevel({
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.35 }}
-          className="mb-8 overflow-x-auto rounded-xl bg-zinc-900 p-5 font-mono text-base leading-relaxed"
+          className="mb-8 overflow-x-auto rounded-xl border border-zinc-800 bg-zinc-900/80 p-5 font-mono text-base leading-relaxed"
         >
-          <code className="whitespace-pre-wrap">
+          <code className="whitespace-pre-wrap text-zinc-200">
             {level.codePrefix}<AnimatePresence mode="wait">
               {selectedWord ? (
                 <motion.span
                   key={selectedWord}
                   initial={{ scale: 0.8, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
+                  animate={{
+                    scale: 1,
+                    opacity: 1,
+                  }}
                   exit={{ scale: 0.8, opacity: 0 }}
-                  className="rounded-md bg-purple-600/20 px-2.5 py-0.5 font-semibold text-purple-400"
+                  className="inline-block rounded-md bg-purple-600/20 px-2 py-0.5 font-semibold text-purple-400"
                 >
                   {selectedWord}
                 </motion.span>
@@ -300,7 +316,7 @@ export default function GameLevel({
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="rounded-md bg-zinc-800 px-2.5 py-0.5 font-mono text-zinc-500"
+                  className="inline-block rounded-md bg-zinc-800 px-2 py-0.5 font-mono text-zinc-500"
                 >
                   _____
                 </motion.span>
@@ -325,11 +341,12 @@ export default function GameLevel({
             transition={{ delay: 0.4 + idx * 0.08 }}
             onClick={() => handleChipClick(word)}
             disabled={selectedWord === word || feedback === 'success' || moduleLives <= 0}
-            className={`rounded-lg px-4 py-2 text-sm font-medium transition-all ${
+            className={cn(
+              'rounded-lg px-4 py-2 text-sm font-medium transition-all',
               selectedWord === word
-                ? 'bg-purple-600 text-white'
-                : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700 hover:text-purple-400'
-            } disabled:opacity-100`}
+                ? 'bg-purple-600 text-white animate-ping-once'
+                : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700 hover:text-purple-400',
+            )}
           >
             {word}
           </motion.button>
@@ -343,11 +360,12 @@ export default function GameLevel({
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className={`mb-4 rounded-lg px-4 py-3 text-sm font-medium ${
+            className={cn(
+              'mb-4 rounded-lg px-4 py-3 text-sm font-medium',
               feedback === 'success'
                 ? 'bg-emerald-900/50 text-emerald-400'
-                : 'bg-red-900/50 text-red-400'
-            }`}
+                : 'bg-red-900/50 text-red-400',
+            )}
           >
             {feedback === 'success'
               ? 'Correto!'
@@ -365,11 +383,12 @@ export default function GameLevel({
           transition={{ delay: 0.5 }}
           onClick={handleVerify}
           disabled={!selectedWord || feedback === 'success' || moduleLives <= 0}
-          className={`w-full rounded-xl py-3.5 text-base font-bold transition-all ${
+          className={cn(
+            'w-full rounded-xl py-3.5 text-base font-bold transition-all',
             !selectedWord || feedback === 'success' || moduleLives <= 0
               ? 'cursor-not-allowed bg-zinc-800 text-zinc-600'
-              : 'bg-purple-600 text-white shadow-lg shadow-purple-600/25 hover:bg-purple-500 active:scale-[0.98]'
-          }`}
+              : 'bg-purple-600 text-white shadow-lg shadow-purple-600/25 hover:bg-purple-500 active:scale-[0.98]',
+          )}
         >
           Verificar
         </motion.button>

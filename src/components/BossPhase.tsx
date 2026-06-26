@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import { Crown, Heart, Loader2, X } from 'lucide-react';
 import { useState } from 'react';
+import { cn } from '@/lib/utils';
 
 interface BossPhaseProps {
   moduleTitle: string;
@@ -122,13 +123,21 @@ export default function BossPhase({
         transition={{ delay: 0.3 }}
         className="mb-6 flex-1"
       >
+        <div className="mb-1.5 flex items-center gap-2 px-1">
+          <div className="flex gap-1.5">
+            <div className="size-2.5 rounded-full bg-red-500/60" />
+            <div className="size-2.5 rounded-full bg-yellow-500/60" />
+            <div className="size-2.5 rounded-full bg-emerald-500/60" />
+          </div>
+          <span className="text-xs text-zinc-600">desafio.py</span>
+        </div>
         <textarea
           value={code}
           onChange={(e) => setCode(e.target.value)}
           disabled={isLocked}
           placeholder="Digite seu código aqui..."
           rows={6}
-          className="w-full resize-none rounded-xl border border-zinc-800 bg-zinc-900 p-5 font-mono text-base text-zinc-100 placeholder-zinc-600 caret-purple-400 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/30 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+          className="w-full resize-none rounded-xl border border-zinc-800 bg-zinc-900/80 p-5 font-mono text-base text-zinc-100 placeholder-zinc-600 caret-purple-400 transition-colors focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/20 disabled:cursor-not-allowed disabled:opacity-50 scrollbar-thin"
         />
       </motion.div>
 
@@ -149,11 +158,12 @@ export default function BossPhase({
           transition={{ delay: 0.45 }}
           onClick={handleSubmit}
           disabled={!code.trim() || isLocked || isLoading}
-          className={`w-full rounded-xl py-3.5 text-base font-bold transition-all ${
+          className={cn(
+            'w-full rounded-xl py-3.5 text-base font-bold transition-all',
             !code.trim() || isLocked || isLoading
               ? 'cursor-not-allowed bg-zinc-800 text-zinc-600'
-              : 'bg-purple-600 text-white shadow-lg shadow-purple-600/25 hover:bg-purple-500 active:scale-[0.98]'
-          }`}
+              : 'bg-purple-600 text-white shadow-lg shadow-purple-600/25 hover:bg-purple-500 active:scale-[0.98]',
+          )}
         >
           {isLoading ? (
             <span className="flex items-center justify-center gap-2">

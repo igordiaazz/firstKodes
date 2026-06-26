@@ -14,6 +14,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { cn } from '@/lib/utils';
 
 export interface ModuleData {
   id: string;
@@ -69,6 +70,11 @@ export interface CarouselProps {
   onStartModule?: (moduleId: string) => void;
   onPracticeModule?: (moduleId: string) => void;
 }
+
+const cardVariants = {
+  initial: { opacity: 0, scale: 0.8 },
+  exit: { opacity: 0, scale: 0.8 },
+};
 
 export default function Carousel({
   modules: externalModules,
@@ -169,7 +175,7 @@ export default function Carousel({
         onPointerUp={handlePointerUp}
         onPointerLeave={handlePointerUp}
         className="relative flex w-full items-center justify-center overflow-visible py-8"
-        style={{ minHeight: 464, touchAction: 'pan-y' }}
+        style={{ minHeight: 520, touchAction: 'pan-y' }}
       >
         <AnimatePresence mode="popLayout">
           {modules.map((mod, index) => {
@@ -198,112 +204,110 @@ export default function Carousel({
               <motion.div
                 key={mod.id}
                 layout
-                initial={{ opacity: 0, scale: 0.8 }}
+                initial="initial"
                 animate={{
                   opacity,
                   scale,
                   x,
                   zIndex,
                 }}
-                exit={{ opacity: 0, scale: 0.8 }}
+                exit="exit"
+                variants={cardVariants}
                 transition={{
                   type: 'spring',
-                  stiffness: 300,
-                  damping: 30,
+                  stiffness: 280,
+                  damping: 25,
                 }}
                 onClick={() => handleCardClick(index)}
-                style={{ width: cardWidth, minHeight: 400 }}
-                className={`absolute shrink-0 cursor-pointer select-none rounded-xl border-2 p-8 transition-shadow ${
-                  isFocused
-                    ? 'border-purple-500 bg-zinc-900 shadow-[0_0_30px_rgba(168,85,247,0.3)]'
-                    : 'border-zinc-800 bg-zinc-950'
-                }`}
-              >
-                <div className="mb-4 flex items-center gap-3">
-                  <div
-                    className={`flex size-12 items-center justify-center rounded-lg ${
-                      isFocused
-                        ? 'bg-purple-600/20 text-purple-400'
-                        : 'bg-zinc-800 text-zinc-500'
-                    }`}
-                  >
-                    <mod.icon size={28} />
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <h3
-                      className={`text-2xl font-bold ${
-                        isFocused ? 'text-zinc-50' : 'text-zinc-400'
-                      }`}
-                    >
-                      {mod.title}
-                    </h3>
-                    {mod.phasesCompleted === mod.totalPhases && (
-                      <CheckCircle2 className="h-5 w-5 text-emerald-500" />
-                    )}
-                    {!mod.unlocked && (
-                      <Lock size={18} className="text-zinc-500" />
-                    )}
-                  </div>
-                </div>
-
-                <p className="mb-5 line-clamp-2 text-sm leading-relaxed text-zinc-400">
-                  {mod.description}
-                </p>
-
-                {/* Progress bar */}
-                <div className="mb-4">
-                  <div className="mb-1 flex items-center justify-between text-xs">
-                    <span className="text-zinc-500">
-                      Progresso
-                    </span>
-                    <span className="text-zinc-400">
-                      {mod.phasesCompleted}/{mod.totalPhases} Fases
-                    </span>
-                  </div>
-                  <div className="h-1.5 overflow-hidden rounded-full bg-zinc-800">
-                    <motion.div
-                      initial={false}
-                      animate={{
-                        width: `${(mod.phasesCompleted / mod.totalPhases) * 100}%`,
-                      }}
-                      transition={{ duration: 0.5, ease: 'easeOut' }}
-                      className="h-full rounded-full bg-purple-500"
-                    />
-                  </div>
-                </div>
-
-                {/* Action Button */}
-                {isFocused && (
-                  <motion.button
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 8 }}
-                    transition={{ duration: 0.2 }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (!mod.unlocked) return;
-                      if (mod.phasesCompleted === mod.totalPhases) {
-                        onPracticeModule?.(mod.id);
-                      } else {
-                        onStartModule?.(mod.id);
-                      }
-                    }}
-                    disabled={!mod.unlocked}
-                    className={`w-full rounded-lg py-2.5 text-sm font-semibold transition-all ${
-                      !mod.unlocked
-                        ? 'cursor-not-allowed bg-zinc-800 text-zinc-600'
-                        : mod.phasesCompleted === mod.totalPhases
-                          ? 'border-2 border-purple-500 bg-transparent text-purple-400 hover:scale-105 hover:bg-purple-500/10 active:scale-95'
-                          : 'bg-purple-600 text-white hover:scale-105 hover:bg-purple-500 active:scale-95'
-                    }`}
-                  >
-                    {!mod.unlocked
-                      ? 'Bloqueado'
-                      : mod.phasesCompleted === mod.totalPhases
-                        ? 'Praticar'
-                        : 'Iniciar'}
-                  </motion.button>
+                style={{ width: cardWidth }}
+                className={cn(
+                  'absolute shrink-0 select-none h-[460px]',
+                  mod.unlocked ? 'cursor-pointer' : 'cursor-default',
                 )}
+              >
+                <div
+                  className={cn(
+                    'h-full p-2 rounded-[2.5rem] bg-zinc-800/40 border border-zinc-700/50 shadow-2xl transition-transform duration-300',
+                    mod.unlocked
+                      ? 'group hover:scale-[1.02]'
+                      : 'opacity-40',
+                  )}
+                >
+                  <div className="relative w-full h-full rounded-[2rem] overflow-hidden bg-zinc-900 border border-zinc-800/80">
+                    {/* Dynamic background with icon */}
+                    <div
+                      className={cn(
+                        'absolute inset-0 flex justify-center pt-16 transition-colors duration-500',
+                        isFocused
+                          ? 'bg-gradient-to-b from-purple-900/20 to-zinc-950 group-hover:from-purple-800/30'
+                          : 'bg-gradient-to-b from-zinc-800/20 to-zinc-950',
+                      )}
+                    >
+                      <div
+                        className={cn(
+                          'w-32 h-32 rounded-full bg-purple-500/10 flex items-center justify-center transition-all duration-500',
+                          isFocused ? 'blur-none' : 'blur-[2px]',
+                        )}
+                      >
+                        <mod.icon size={64} className="text-purple-400/80" />
+                      </div>
+                    </div>
+
+                    {/* Bottom Frost */}
+                    <div className="absolute bottom-0 left-0 right-0 pt-16 pb-6 px-6 bg-gradient-to-t from-zinc-950 via-zinc-950/95 to-transparent backdrop-blur-sm">
+                      <div className="flex items-center gap-2 mb-2">
+                        <h3 className="text-2xl font-bold text-zinc-50 tracking-tight">
+                          {mod.title}
+                        </h3>
+                        {mod.phasesCompleted === mod.totalPhases && (
+                          <CheckCircle2 className="h-5 w-5 text-emerald-500 shrink-0" />
+                        )}
+                      </div>
+                      <p className="text-zinc-400 text-sm leading-relaxed mb-6 font-medium line-clamp-2">
+                        {mod.description}
+                      </p>
+
+                      <div className="flex items-center justify-between">
+                        <div className="flex gap-4 text-zinc-300 text-sm font-semibold">
+                          <span>
+                            {mod.phasesCompleted}/{mod.totalPhases} fases
+                          </span>
+                        </div>
+
+                        {isFocused && (
+                          <motion.button
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.9 }}
+                            transition={{ duration: 0.2 }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (!mod.unlocked) return;
+                              if (mod.phasesCompleted === mod.totalPhases) {
+                                onPracticeModule?.(mod.id);
+                              } else {
+                                onStartModule?.(mod.id);
+                              }
+                            }}
+                            disabled={!mod.unlocked}
+                            className={cn(
+                              'px-5 py-2.5 font-bold text-sm rounded-full transition-colors shadow-[0_0_15px_rgba(255,255,255,0.1)]',
+                              !mod.unlocked
+                                ? 'cursor-not-allowed bg-zinc-800 text-zinc-600'
+                                : 'bg-zinc-100 hover:bg-white text-zinc-950',
+                            )}
+                          >
+                            {!mod.unlocked
+                              ? 'Bloqueado'
+                              : mod.phasesCompleted === mod.totalPhases
+                                ? 'Praticar'
+                                : 'Iniciar'}
+                          </motion.button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </motion.div>
             );
           })}
@@ -315,7 +319,7 @@ export default function Carousel({
           onClick={previous}
           disabled={focusedIndex === 0}
           aria-label="Módulo anterior"
-          className="text-zinc-600 transition-colors hover:text-zinc-300 disabled:pointer-events-none disabled:opacity-20"
+          className="rounded-full p-2 text-zinc-600 transition-colors hover:bg-zinc-800 hover:text-zinc-300 disabled:pointer-events-none disabled:opacity-20"
         >
           <ChevronLeft size={20} />
         </button>
@@ -326,7 +330,7 @@ export default function Carousel({
           onClick={next}
           disabled={focusedIndex === modules.length - 1}
           aria-label="Próximo módulo"
-          className="text-zinc-600 transition-colors hover:text-zinc-300 disabled:pointer-events-none disabled:opacity-20"
+          className="rounded-full p-2 text-zinc-600 transition-colors hover:bg-zinc-800 hover:text-zinc-300 disabled:pointer-events-none disabled:opacity-20"
         >
           <ChevronRight size={20} />
         </button>

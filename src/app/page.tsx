@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { Braces, Code, Flame, GitBranch, Loader2, Repeat, Settings, Terminal, X } from 'lucide-react';
+import { BlurReveal } from '@/components/BlurReveal';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Carousel from '@/components/Carousel';
 import Footer from '@/components/Footer';
@@ -166,16 +167,6 @@ export default function Home() {
     [completePhase],
   );
 
-  if (!hydrated) {
-    return (
-      <div className="flex min-h-screen w-full flex-col items-center justify-center overflow-x-hidden bg-zinc-950 px-4">
-        <div className="flex size-12 items-center justify-center rounded-xl bg-purple-600/20">
-          <Loader2 size={28} className="animate-spin text-purple-400" />
-        </div>
-      </div>
-    );
-  }
-
   if (view === 'game' && activeModuleId && LEVELS_MAP[activeModuleId]) {
     const levels = LEVELS_MAP[activeModuleId];
     const saved = progress.phasesCompleted[activeModuleId] ?? 0;
@@ -257,12 +248,13 @@ export default function Home() {
             <div className="flex size-12 items-center justify-center rounded-xl bg-purple-600/20">
               <Terminal size={28} className="text-purple-400" />
             </div>
-            <h1 className="text-3xl font-extrabold tracking-tight text-zinc-50 sm:text-4xl" style={{ fontFamily: 'var(--font-mono-coding)' }}>
-              first<span className="text-purple-400">Kodes</span>
+            <h1 className="text-3xl font-extrabold tracking-tight text-zinc-50 sm:text-4xl">
+              <BlurReveal as="span">first</BlurReveal>
+              <BlurReveal as="span" delay={0.15} className="text-purple-400">Kodes</BlurReveal>
             </h1>
           </div>
-          <p className="text-base text-zinc-400 sm:text-lg">
-            Sua jornada na programação começa aqui
+          <p className="text-base text-zinc-600 sm:text-lg">
+            <BlurReveal as="span" delay={0.3}>Sua jornada na programação começa aqui</BlurReveal>
           </p>
         </div>
 
@@ -305,25 +297,36 @@ export default function Home() {
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="relative w-80 rounded-xl bg-zinc-900 p-6 shadow-xl"
+            className="relative w-80 rounded-xl border border-zinc-800 bg-zinc-900 p-6 shadow-xl"
           >
-            <button
-              onClick={() => setShowSettings(false)}
-              className="absolute top-3 right-3 flex size-7 items-center justify-center rounded-full bg-zinc-800 text-zinc-400 transition-colors hover:text-zinc-50"
-            >
-              <X size={16} />
-            </button>
-            <h2 className="mb-6 text-lg font-bold text-zinc-50">Configurações</h2>
-            <button
-              onClick={() => {
-                resetProgress();
-                setShowStreakCelebration(false);
-                setShowSettings(false);
-              }}
-              className="w-full rounded-lg bg-red-600 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-red-500"
-            >
-              Resetar Progresso
-            </button>
+            <div className="mb-4 flex items-center gap-3">
+              <div className="flex size-10 items-center justify-center rounded-lg bg-purple-600/20">
+                <Settings size={20} className="text-purple-400" />
+              </div>
+              <h2 className="text-lg font-bold text-zinc-50">Configurações</h2>
+            </div>
+            <div className="mb-4 border-t border-zinc-800" />
+            <p className="mb-4 text-sm text-zinc-400">
+              Esta ação irá apagar todo o seu progresso, incluindo fases concluídas e streak.
+            </p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowSettings(false)}
+                className="flex-1 rounded-lg border border-zinc-700 px-4 py-3 text-sm font-semibold text-zinc-300 transition-colors hover:bg-zinc-800"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => {
+                  resetProgress();
+                  setShowStreakCelebration(false);
+                  setShowSettings(false);
+                }}
+                className="flex-1 rounded-lg bg-red-600 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-red-500"
+              >
+                Resetar
+              </button>
+            </div>
           </motion.div>
         </div>
       )}
