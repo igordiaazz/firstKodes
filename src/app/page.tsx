@@ -2,7 +2,6 @@
 
 import { motion } from 'framer-motion';
 import { Braces, Code, Flame, GitBranch, Loader2, Repeat, Settings, Star, Terminal, X } from 'lucide-react';
-import { BlurReveal } from '@/components/BlurReveal';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Carousel from '@/components/Carousel';
 import Footer from '@/components/Footer';
@@ -282,15 +281,13 @@ export default function Home() {
               <Terminal size={28} className="text-purple-400" />
             </div>
             <h1 className="text-3xl font-extrabold tracking-tight text-zinc-50 sm:text-4xl">
-              <BlurReveal as="span">first</BlurReveal>
-              <BlurReveal as="span" delay={0.15} className="text-purple-400">Kodes</BlurReveal>
+              first<span className="text-purple-400">Kodes</span>
             </h1>
           </div>
           <p className="text-base text-zinc-600 sm:text-lg">
-            <BlurReveal as="span" delay={0.3}>Sua jornada na programação começa aqui</BlurReveal>
+            Sua jornada na programação começa aqui
           </p>
         </div>
-
         <div>
           <Carousel
             modules={modules}

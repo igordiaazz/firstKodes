@@ -11,7 +11,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 export interface ModuleData {
   id: string;
@@ -69,6 +69,8 @@ export interface CarouselProps {
   onAdminUnlock?: () => void;
 }
 
+const MODULE_BG = 'bg-neutral-900';
+
 export default function Carousel({
   modules: externalModules,
   onStartModule,
@@ -80,51 +82,52 @@ export default function Carousel({
   const [clickCount, setClickCount] = useState(0);
   const [showAdminPopup, setShowAdminPopup] = useState(false);
   const [adminPassword, setAdminPassword] = useState('');
-  const touchStartX = useRef(0);
 
   useEffect(() => {
     setActiveIndex((prev) => Math.min(prev, modules.length - 1));
   }, [modules.length]);
 
-  const goNext = () =>
-    setActiveIndex((prev) => Math.min(prev + 1, modules.length - 1));
-  const goPrev = () => setActiveIndex((prev) => Math.max(prev - 1, 0));
-  const goTo = (index: number) => setActiveIndex(index);
+  const goTo = useCallback((index: number) => {
+    setActiveIndex(Math.max(0, Math.min(index, modules.length - 1)));
+  }, [modules.length]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'ArrowRight') {
         e.preventDefault();
-        setActiveIndex((prev) => Math.min(prev + 1, modules.length - 1));
+        goTo(activeIndex + 1);
       }
       if (e.key === 'ArrowLeft') {
         e.preventDefault();
-        setActiveIndex((prev) => Math.max(prev - 1, 0));
+        goTo(activeIndex - 1);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [modules.length]);
+  }, [activeIndex, goTo]);
 
-  const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0].clientX;
-  };
-
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    const diff = touchStartX.current - e.changedTouches[0].clientX;
-    if (Math.abs(diff) > 50) {
-      if (diff > 0) goNext();
-      else goPrev();
+  const handleCardClick = (mod: ModuleData, idx: number) => {
+    if (idx !== activeIndex) {
+      goTo(idx);
+      return;
+    }
+    if (!mod.unlocked) return;
+    if (mod.phasesCompleted === mod.totalPhases) {
+      onPracticeModule?.(mod.id);
+    } else {
+      onStartModule?.(mod.id);
     }
   };
 
-  const handleFirstCardClick = () => {
-    const next = clickCount + 1;
-    if (next >= 10) {
-      setClickCount(0);
-      setShowAdminPopup(true);
-    } else {
+  const handleIconClick = (e: React.MouseEvent, modIndex: number) => {
+    e.stopPropagation();
+    if (modIndex === 0) {
+      const next = clickCount + 1;
       setClickCount(next);
+      if (next >= 10) {
+        setClickCount(0);
+        setShowAdminPopup(true);
+      }
     }
   };
 
@@ -136,173 +139,135 @@ export default function Carousel({
     }
   };
 
-  const getCardStyle = (index: number): React.CSSProperties => {
-    const offset = index - activeIndex;
-    const absOffset = Math.abs(offset);
-
-    const baseShift = 75;
-    const extraShift = 15;
-    const totalShift = offset === 0 ? 0 : (baseShift + (absOffset - 1) * extraShift) * Math.sign(offset);
-    const translateX = -50 + totalShift;
-    const zIndex = modules.length - absOffset;
-
-    const getOpacity = (): number => {
-      if (absOffset <= 3) return 1;
-      return 0;
-    };
-
-    const getScale = (): number => {
-      if (absOffset === 0) return 1;
-      if (absOffset === 1) return 0.85;
-      if (absOffset === 2) return 0.75;
-      return 0.65;
-    };
-
-    const style: React.CSSProperties = {
-      position: 'absolute',
-      left: '50%',
-      top: '50%',
-      transform: `translateX(${translateX}%) translateY(-50%) scale(${getScale()})`,
-      zIndex,
-      opacity: getOpacity(),
-      pointerEvents: absOffset <= 3 ? 'auto' : 'none',
-      transition: 'all 500ms cubic-bezier(0.4, 0, 0.2, 1)',
-    };
-
-    if (absOffset === 1) {
-      style.filter = 'brightness(0.85) blur(1px)';
-    } else if (absOffset === 2) {
-      style.filter = 'brightness(0.7) blur(2px)';
-    } else if (absOffset >= 3) {
-      style.filter = 'brightness(0.55) blur(3px)';
-    }
-
-    if (absOffset === 0) {
-      style.boxShadow = '0 25px 50px -12px rgba(0,0,0,0.6)';
-    }
-
-    return style;
-  };
-
   return (
-    <div className="relative w-screen left-1/2 -translate-x-1/2">
-      <div
-        className="relative h-[460px] md:h-[520px] select-none"
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
-      >
-        {modules.map((mod, idx) => (
-          <div key={mod.id} style={getCardStyle(idx)}>
+    <div className="relative w-screen left-1/2 -translate-x-1/2 mt-16 md:mt-24">
+      <div className="h-[500px] overflow-hidden relative">
+        {modules.map((mod, idx) => {
+          const isLocked = !mod.unlocked;
+          const centerOffset = idx - activeIndex;
+          const direcao = centerOffset > 0 ? 1 : -1;
+          const absOffset = Math.abs(centerOffset);
+          const isActive = idx === activeIndex;
+
+          let translateX = 0;
+          let scale = 1;
+          const zIndex = 50 - absOffset;
+          let opacity = 1;
+          let filter = 'blur(0px) brightness(100%)';
+
+          if (centerOffset !== 0) {
+            translateX = (360 + (absOffset - 1) * 90) * direcao;
+            scale = 0.85 - absOffset * 0.02;
+            opacity = 1;
+            filter = 'blur(2px) brightness(85%)';
+          }
+
+          return (
             <div
-              className="w-[85vw] max-w-[360px]"
-              onClick={() => {
-                if (idx !== activeIndex) {
-                  goTo(idx);
-                }
+              key={mod.id}
+              className="absolute inset-0 m-auto w-[85vw] max-w-[320px] h-[480px]"
+              style={{
+                transform: `translateX(${translateX}px) scale(${scale})`,
+                zIndex,
+                opacity,
+                filter,
+                transition: 'all 500ms cubic-bezier(0.4, 0, 0.2, 1)',
               }}
             >
               <div
+                onClick={() => handleCardClick(mod, idx)}
                 className={cn(
-                  'flex flex-col overflow-hidden rounded-[24px] border border-white/10 min-h-[440px]',
-                  idx !== activeIndex && 'pointer-events-none',
+                  'relative overflow-hidden rounded-3xl h-full cursor-pointer group border border-white/10',
+                  MODULE_BG,
                 )}
               >
-                <div
-                  className="flex h-48 items-center justify-center bg-neutral-800"
-                  onClick={(e) => {
-                    if (idx === 0 && idx === activeIndex) {
-                      e.stopPropagation();
-                      handleFirstCardClick();
-                    }
-                  }}
-                >
-                  <mod.icon
-                    size={48}
-                    className={mod.unlocked ? 'text-purple-400' : 'text-zinc-700'}
-                  />
-                </div>
-
-                <div className="flex flex-1 flex-col bg-neutral-900 p-8">
-                  <div className="flex items-center gap-2">
-                    <h3
-                      className={cn(
-                        'text-2xl font-semibold tracking-tight',
-                        mod.unlocked ? 'text-zinc-50' : 'text-zinc-600',
-                      )}
+                <div className="flex flex-col h-full p-6 md:p-8">
+                  <div>
+                    <p
+                      className="text-sm text-white/60 font-medium"
+                      onClick={(e) => handleIconClick(e, idx)}
                     >
-                      {mod.title}
-                    </h3>
-                    {mod.phasesCompleted === mod.totalPhases && (
-                      <CheckCircle2 size={20} className="shrink-0 text-emerald-500" />
-                    )}
+                      Módulo {idx + 1}
+                    </p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <h3 className="text-2xl font-bold text-white tracking-tight leading-tight md:text-3xl">
+                        {mod.title}
+                      </h3>
+                      {mod.phasesCompleted === mod.totalPhases && (
+                        <CheckCircle2 size={20} className="shrink-0 text-emerald-400" />
+                      )}
+                    </div>
+                    <p className="text-sm text-white/60 mt-1.5 leading-relaxed line-clamp-2">
+                      {mod.description}
+                    </p>
                   </div>
 
-                  <p
-                    className={cn(
-                      'mt-2 text-base leading-relaxed',
-                      mod.unlocked ? 'text-zinc-400' : 'text-zinc-700',
-                    )}
-                  >
-                    {mod.description}
-                  </p>
-
-                  <div className="mt-auto flex items-center justify-between pt-4 border-t border-white/10">
-                    <span
+                  <div className="flex-1 flex items-center justify-center">
+                    <mod.icon
+                      size={88}
                       className={cn(
-                        'text-base font-medium',
-                        mod.unlocked ? 'text-zinc-500' : 'text-zinc-700',
+                        'md:size-24 transition-all duration-300',
+                        isLocked
+                          ? 'text-white/10 group-hover:scale-110'
+                          : isActive
+                            ? 'text-purple-400/40 scale-110 drop-shadow-[0_0_12px_rgba(168,85,247,0.5)] drop-shadow-[0_0_35px_rgba(168,85,247,0.25)]'
+                            : 'text-purple-500/20 group-hover:text-purple-400/40 group-hover:scale-110 group-hover:drop-shadow-[0_0_15px_rgba(168,85,247,0.3)]',
                       )}
-                    >
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-white/60 font-medium">
                       {mod.phasesCompleted}/{mod.totalPhases} fases
                     </span>
 
-                    <button
-                      onClick={() => {
-                        if (!mod.unlocked) return;
-                        if (mod.phasesCompleted === mod.totalPhases) {
-                          onPracticeModule?.(mod.id);
-                        } else {
-                          onStartModule?.(mod.id);
-                        }
-                      }}
-                      disabled={!mod.unlocked}
-                      className={cn(
-                        'rounded-full px-6 py-2.5 text-base font-semibold transition-colors',
-                        !mod.unlocked
-                          ? 'bg-zinc-800 text-zinc-600 cursor-not-allowed'
-                          : 'bg-zinc-100 text-zinc-900 hover:bg-white',
-                      )}
-                    >
-                      {!mod.unlocked
-                        ? 'Bloqueado'
-                        : mod.phasesCompleted === mod.totalPhases
+                    {isLocked ? (
+                      <span className="rounded-full bg-white/10 px-5 py-2 text-sm font-semibold text-white/50 backdrop-blur-sm border border-white/5">
+                        Bloqueado
+                      </span>
+                    ) : (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (mod.phasesCompleted === mod.totalPhases) {
+                            onPracticeModule?.(mod.id);
+                          } else {
+                            onStartModule?.(mod.id);
+                          }
+                        }}
+                        className="rounded-full bg-white px-5 py-2 text-sm font-semibold text-zinc-900 transition-colors hover:bg-zinc-200"
+                      >
+                        {mod.phasesCompleted === mod.totalPhases
                           ? 'Praticar'
                           : 'Iniciar'}
-                    </button>
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
-      <button
-        onClick={goPrev}
-        className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 z-10 hidden md:flex size-10 items-center justify-center rounded-full bg-zinc-900/80 border border-white/10 text-zinc-400 hover:text-zinc-50 hover:bg-zinc-800 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-        aria-label="Anterior"
-        disabled={activeIndex === 0}
-      >
-        <ChevronLeft size={20} />
-      </button>
-      <button
-        onClick={goNext}
-        className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 z-10 hidden md:flex size-10 items-center justify-center rounded-full bg-zinc-900/80 border border-white/10 text-zinc-400 hover:text-zinc-50 hover:bg-zinc-800 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-        aria-label="Próximo"
-        disabled={activeIndex === modules.length - 1}
-      >
-        <ChevronRight size={20} />
-      </button>
+      <div className="flex items-center justify-center gap-4 mt-12">
+        <button
+          onClick={() => goTo(activeIndex - 1)}
+          className="flex size-10 items-center justify-center rounded-full bg-zinc-900/80 border border-white/10 text-zinc-400 hover:text-zinc-50 hover:bg-zinc-800 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+          aria-label="Anterior"
+          disabled={activeIndex === 0}
+        >
+          <ChevronLeft size={20} />
+        </button>
+        <button
+          onClick={() => goTo(activeIndex + 1)}
+          className="flex size-10 items-center justify-center rounded-full bg-zinc-900/80 border border-white/10 text-zinc-400 hover:text-zinc-50 hover:bg-zinc-800 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+          aria-label="Próximo"
+          disabled={activeIndex === modules.length - 1}
+        >
+          <ChevronRight size={20} />
+        </button>
+      </div>
 
       {showAdminPopup && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
