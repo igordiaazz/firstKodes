@@ -1,6 +1,5 @@
 'use client';
 
-import { AnimatePresence, motion } from 'framer-motion';
 import {
   Braces,
   CheckCircle2,
@@ -8,13 +7,11 @@ import {
   ChevronRight,
   Code,
   GitBranch,
-  Heart,
-  Lock,
   Repeat,
   type LucideIcon,
 } from 'lucide-react';
-import { useCallback, useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
+import { useEffect, useRef, useState } from 'react';
 
 export interface ModuleData {
   id: string;
@@ -69,272 +66,274 @@ export interface CarouselProps {
   modules?: ModuleData[];
   onStartModule?: (moduleId: string) => void;
   onPracticeModule?: (moduleId: string) => void;
+  onAdminUnlock?: () => void;
 }
-
-const cardVariants = {
-  initial: { opacity: 0, scale: 0.8 },
-  exit: { opacity: 0, scale: 0.8 },
-};
 
 export default function Carousel({
   modules: externalModules,
   onStartModule,
   onPracticeModule,
+  onAdminUnlock,
 }: CarouselProps) {
   const modules = externalModules ?? MOCK_MODULES;
-  const [focusedIndex, setFocusedIndex] = useState(0);
-  const [cardWidth, setCardWidth] = useState(320);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const isTransitioning = useRef(false);
-  const swipeStartX = useRef(0);
-  const swiping = useRef(false);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [clickCount, setClickCount] = useState(0);
+  const [showAdminPopup, setShowAdminPopup] = useState(false);
+  const [adminPassword, setAdminPassword] = useState('');
+  const touchStartX = useRef(0);
 
   useEffect(() => {
-    const updateWidth = () => {
-      const vw = window.innerWidth;
-      setCardWidth(vw < 768 ? Math.min(vw * 0.85, 384) : 384);
-    };
-    updateWidth();
-    window.addEventListener('resize', updateWidth);
-    return () => window.removeEventListener('resize', updateWidth);
-  }, []);
+    setActiveIndex((prev) => Math.min(prev, modules.length - 1));
+  }, [modules.length]);
 
-  const goTo = useCallback(
-    (index: number) => {
-      if (isTransitioning.current) return;
-      isTransitioning.current = true;
-      setFocusedIndex(index);
-      setTimeout(() => {
-        isTransitioning.current = false;
-      }, 400);
-    },
-    [],
-  );
+  const goNext = () =>
+    setActiveIndex((prev) => Math.min(prev + 1, modules.length - 1));
+  const goPrev = () => setActiveIndex((prev) => Math.max(prev - 1, 0));
+  const goTo = (index: number) => setActiveIndex(index);
 
-  const previous = useCallback(
-    () => goTo(Math.max(0, focusedIndex - 1)),
-    [focusedIndex, goTo],
-  );
-  const next = useCallback(
-    () => goTo(Math.min(modules.length - 1, focusedIndex + 1)),
-    [focusedIndex, goTo, modules.length],
-  );
-
-  const handlePointerDown = useCallback((e: React.PointerEvent) => {
-    swipeStartX.current = e.clientX;
-    swiping.current = false;
-  }, []);
-
-  const handlePointerMove = useCallback((e: React.PointerEvent) => {
-    if (swipeStartX.current === 0) return;
-    const diff = Math.abs(e.clientX - swipeStartX.current);
-    if (diff > 10) {
-      swiping.current = true;
-    }
-  }, []);
-
-  const handlePointerUp = useCallback(
-    (e: React.PointerEvent) => {
-      const startX = swipeStartX.current;
-      swipeStartX.current = 0;
-
-      if (!swiping.current || startX === 0) return;
-
-      const diff = e.clientX - startX;
-      swiping.current = false;
-
-      if (diff < -50) {
-        next();
-      } else if (diff > 50) {
-        previous();
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        setActiveIndex((prev) => Math.min(prev + 1, modules.length - 1));
       }
-    },
-    [next, previous],
-  );
-
-  useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowLeft') previous();
-      else if (e.key === 'ArrowRight') next();
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        setActiveIndex((prev) => Math.max(prev - 1, 0));
+      }
     };
-    window.addEventListener('keydown', handleKey);
-    return () => window.removeEventListener('keydown', handleKey);
-  }, [previous, next]);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [modules.length]);
 
-  const handleCardClick = (index: number) => {
-    if (index === focusedIndex) return;
-    goTo(index);
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    const diff = touchStartX.current - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 50) {
+      if (diff > 0) goNext();
+      else goPrev();
+    }
+  };
+
+  const handleFirstCardClick = () => {
+    const next = clickCount + 1;
+    if (next >= 10) {
+      setClickCount(0);
+      setShowAdminPopup(true);
+    } else {
+      setClickCount(next);
+    }
+  };
+
+  const handleAdminSubmit = () => {
+    if (adminPassword === '123456') {
+      onAdminUnlock?.();
+      setShowAdminPopup(false);
+      setAdminPassword('');
+    }
+  };
+
+  const getCardStyle = (index: number): React.CSSProperties => {
+    const offset = index - activeIndex;
+    const absOffset = Math.abs(offset);
+
+    const baseShift = 75;
+    const extraShift = 15;
+    const totalShift = offset === 0 ? 0 : (baseShift + (absOffset - 1) * extraShift) * Math.sign(offset);
+    const translateX = -50 + totalShift;
+    const zIndex = modules.length - absOffset;
+
+    const getOpacity = (): number => {
+      if (absOffset <= 3) return 1;
+      return 0;
+    };
+
+    const getScale = (): number => {
+      if (absOffset === 0) return 1;
+      if (absOffset === 1) return 0.85;
+      if (absOffset === 2) return 0.75;
+      return 0.65;
+    };
+
+    const style: React.CSSProperties = {
+      position: 'absolute',
+      left: '50%',
+      top: '50%',
+      transform: `translateX(${translateX}%) translateY(-50%) scale(${getScale()})`,
+      zIndex,
+      opacity: getOpacity(),
+      pointerEvents: absOffset <= 3 ? 'auto' : 'none',
+      transition: 'all 500ms cubic-bezier(0.4, 0, 0.2, 1)',
+    };
+
+    if (absOffset === 1) {
+      style.filter = 'brightness(0.85) blur(1px)';
+    } else if (absOffset === 2) {
+      style.filter = 'brightness(0.7) blur(2px)';
+    } else if (absOffset >= 3) {
+      style.filter = 'brightness(0.55) blur(3px)';
+    }
+
+    if (absOffset === 0) {
+      style.boxShadow = '0 25px 50px -12px rgba(0,0,0,0.6)';
+    }
+
+    return style;
   };
 
   return (
-    <div className="relative mx-auto flex w-full max-w-md flex-col items-center px-0">
+    <div className="relative w-screen left-1/2 -translate-x-1/2">
       <div
-        ref={containerRef}
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
-        onPointerLeave={handlePointerUp}
-        className="relative flex w-full items-center justify-center overflow-visible py-8"
-        style={{ minHeight: 520, touchAction: 'pan-y' }}
+        className="relative h-[460px] md:h-[520px] select-none"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
       >
-        <AnimatePresence mode="popLayout">
-          {modules.map((mod, index) => {
-            const distance = index - focusedIndex;
-            const isFocused = distance === 0;
-            const isVisible = Math.abs(distance) <= 1;
-
-            if (!isVisible) return null;
-
-            let scale = 0.85;
-            let opacity = 0.5;
-            let x = 0;
-            let zIndex = 1;
-
-            if (distance === -1) {
-              x = -cardWidth - 40;
-            } else if (distance === 1) {
-              x = cardWidth + 40;
-            } else if (distance === 0) {
-              scale = 1;
-              opacity = 1;
-              zIndex = 10;
-            }
-
-            return (
-              <motion.div
-                key={mod.id}
-                layout
-                initial="initial"
-                animate={{
-                  opacity,
-                  scale,
-                  x,
-                  zIndex,
-                }}
-                exit="exit"
-                variants={cardVariants}
-                transition={{
-                  type: 'spring',
-                  stiffness: 280,
-                  damping: 25,
-                }}
-                onClick={() => handleCardClick(index)}
-                style={{ width: cardWidth }}
+        {modules.map((mod, idx) => (
+          <div key={mod.id} style={getCardStyle(idx)}>
+            <div
+              className="w-[85vw] max-w-[360px]"
+              onClick={() => {
+                if (idx !== activeIndex) {
+                  goTo(idx);
+                }
+              }}
+            >
+              <div
                 className={cn(
-                  'absolute shrink-0 select-none h-[460px]',
-                  mod.unlocked ? 'cursor-pointer' : 'cursor-default',
+                  'flex flex-col overflow-hidden rounded-[24px] border border-white/10 min-h-[440px]',
+                  idx !== activeIndex && 'pointer-events-none',
                 )}
               >
                 <div
-                  className={cn(
-                    'h-full p-2 rounded-[2.5rem] bg-zinc-800/40 border border-zinc-700/50 shadow-2xl transition-transform duration-300',
-                    mod.unlocked
-                      ? 'group hover:scale-[1.02]'
-                      : 'opacity-40',
-                  )}
+                  className="flex h-48 items-center justify-center bg-neutral-800"
+                  onClick={(e) => {
+                    if (idx === 0 && idx === activeIndex) {
+                      e.stopPropagation();
+                      handleFirstCardClick();
+                    }
+                  }}
                 >
-                  <div className="relative w-full h-full rounded-[2rem] overflow-hidden bg-zinc-900 border border-zinc-800/80">
-                    {/* Dynamic background with icon */}
-                    <div
+                  <mod.icon
+                    size={48}
+                    className={mod.unlocked ? 'text-purple-400' : 'text-zinc-700'}
+                  />
+                </div>
+
+                <div className="flex flex-1 flex-col bg-neutral-900 p-8">
+                  <div className="flex items-center gap-2">
+                    <h3
                       className={cn(
-                        'absolute inset-0 flex justify-center pt-16 transition-colors duration-500',
-                        isFocused
-                          ? 'bg-gradient-to-b from-purple-900/20 to-zinc-950 group-hover:from-purple-800/30'
-                          : 'bg-gradient-to-b from-zinc-800/20 to-zinc-950',
+                        'text-2xl font-semibold tracking-tight',
+                        mod.unlocked ? 'text-zinc-50' : 'text-zinc-600',
                       )}
                     >
-                      <div
-                        className={cn(
-                          'w-32 h-32 rounded-full bg-purple-500/10 flex items-center justify-center transition-all duration-500',
-                          isFocused ? 'blur-none' : 'blur-[2px]',
-                        )}
-                      >
-                        <mod.icon size={64} className="text-purple-400/80" />
-                      </div>
-                    </div>
+                      {mod.title}
+                    </h3>
+                    {mod.phasesCompleted === mod.totalPhases && (
+                      <CheckCircle2 size={20} className="shrink-0 text-emerald-500" />
+                    )}
+                  </div>
 
-                    {/* Bottom Frost */}
-                    <div className="absolute bottom-0 left-0 right-0 pt-16 pb-6 px-6 bg-gradient-to-t from-zinc-950 via-zinc-950/95 to-transparent backdrop-blur-sm">
-                      <div className="flex items-center gap-2 mb-2">
-                        <h3 className="text-2xl font-bold text-zinc-50 tracking-tight">
-                          {mod.title}
-                        </h3>
-                        {mod.phasesCompleted === mod.totalPhases && (
-                          <CheckCircle2 className="h-5 w-5 text-emerald-500 shrink-0" />
-                        )}
-                      </div>
-                      <p className="text-zinc-400 text-sm leading-relaxed mb-6 font-medium line-clamp-2">
-                        {mod.description}
-                      </p>
+                  <p
+                    className={cn(
+                      'mt-2 text-base leading-relaxed',
+                      mod.unlocked ? 'text-zinc-400' : 'text-zinc-700',
+                    )}
+                  >
+                    {mod.description}
+                  </p>
 
-                      <div className="flex items-center justify-between">
-                        <div className="flex gap-4 text-zinc-300 text-sm font-semibold">
-                          <span>
-                            {mod.phasesCompleted}/{mod.totalPhases} fases
-                          </span>
-                        </div>
+                  <div className="mt-auto flex items-center justify-between pt-4 border-t border-white/10">
+                    <span
+                      className={cn(
+                        'text-base font-medium',
+                        mod.unlocked ? 'text-zinc-500' : 'text-zinc-700',
+                      )}
+                    >
+                      {mod.phasesCompleted}/{mod.totalPhases} fases
+                    </span>
 
-                        {isFocused && (
-                          <motion.button
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.9 }}
-                            transition={{ duration: 0.2 }}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if (!mod.unlocked) return;
-                              if (mod.phasesCompleted === mod.totalPhases) {
-                                onPracticeModule?.(mod.id);
-                              } else {
-                                onStartModule?.(mod.id);
-                              }
-                            }}
-                            disabled={!mod.unlocked}
-                            className={cn(
-                              'px-5 py-2.5 font-bold text-sm rounded-full transition-colors shadow-[0_0_15px_rgba(255,255,255,0.1)]',
-                              !mod.unlocked
-                                ? 'cursor-not-allowed bg-zinc-800 text-zinc-600'
-                                : 'bg-zinc-100 hover:bg-white text-zinc-950',
-                            )}
-                          >
-                            {!mod.unlocked
-                              ? 'Bloqueado'
-                              : mod.phasesCompleted === mod.totalPhases
-                                ? 'Praticar'
-                                : 'Iniciar'}
-                          </motion.button>
-                        )}
-                      </div>
-                    </div>
+                    <button
+                      onClick={() => {
+                        if (!mod.unlocked) return;
+                        if (mod.phasesCompleted === mod.totalPhases) {
+                          onPracticeModule?.(mod.id);
+                        } else {
+                          onStartModule?.(mod.id);
+                        }
+                      }}
+                      disabled={!mod.unlocked}
+                      className={cn(
+                        'rounded-full px-6 py-2.5 text-base font-semibold transition-colors',
+                        !mod.unlocked
+                          ? 'bg-zinc-800 text-zinc-600 cursor-not-allowed'
+                          : 'bg-zinc-100 text-zinc-900 hover:bg-white',
+                      )}
+                    >
+                      {!mod.unlocked
+                        ? 'Bloqueado'
+                        : mod.phasesCompleted === mod.totalPhases
+                          ? 'Praticar'
+                          : 'Iniciar'}
+                    </button>
                   </div>
                 </div>
-              </motion.div>
-            );
-          })}
-        </AnimatePresence>
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
 
-      <div className="flex items-center gap-6 pb-4">
-        <button
-          onClick={previous}
-          disabled={focusedIndex === 0}
-          aria-label="Módulo anterior"
-          className="rounded-full p-2 text-zinc-600 transition-colors hover:bg-zinc-800 hover:text-zinc-300 disabled:pointer-events-none disabled:opacity-20"
-        >
-          <ChevronLeft size={20} />
-        </button>
-        <span className="text-xs text-zinc-600">
-          {focusedIndex + 1} / {modules.length}
-        </span>
-        <button
-          onClick={next}
-          disabled={focusedIndex === modules.length - 1}
-          aria-label="Próximo módulo"
-          className="rounded-full p-2 text-zinc-600 transition-colors hover:bg-zinc-800 hover:text-zinc-300 disabled:pointer-events-none disabled:opacity-20"
-        >
-          <ChevronRight size={20} />
-        </button>
-      </div>
+      <button
+        onClick={goPrev}
+        className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 z-10 hidden md:flex size-10 items-center justify-center rounded-full bg-zinc-900/80 border border-white/10 text-zinc-400 hover:text-zinc-50 hover:bg-zinc-800 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+        aria-label="Anterior"
+        disabled={activeIndex === 0}
+      >
+        <ChevronLeft size={20} />
+      </button>
+      <button
+        onClick={goNext}
+        className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 z-10 hidden md:flex size-10 items-center justify-center rounded-full bg-zinc-900/80 border border-white/10 text-zinc-400 hover:text-zinc-50 hover:bg-zinc-800 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+        aria-label="Próximo"
+        disabled={activeIndex === modules.length - 1}
+      >
+        <ChevronRight size={20} />
+      </button>
+
+      {showAdminPopup && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+          <div className="w-80 rounded-xl border border-zinc-800 bg-zinc-900 p-6 shadow-xl">
+            <h2 className="mb-4 text-lg font-bold text-zinc-50">Acesso Administrativo</h2>
+            <input
+              type="password"
+              value={adminPassword}
+              onChange={(e) => setAdminPassword(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleAdminSubmit()}
+              placeholder="Digite a senha"
+              className="mb-4 w-full rounded-lg border border-zinc-700 bg-zinc-800 px-4 py-3 text-sm text-zinc-100 placeholder-zinc-500 focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/20 focus:outline-none"
+              autoFocus
+            />
+            <div className="flex gap-2">
+              <button
+                onClick={() => { setShowAdminPopup(false); setAdminPassword(''); }}
+                className="flex-1 rounded-lg border border-zinc-700 px-4 py-3 text-sm font-semibold text-zinc-300 transition-colors hover:bg-zinc-800"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleAdminSubmit}
+                className="flex-1 rounded-lg bg-purple-600 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-purple-500"
+              >
+                Confirmar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
