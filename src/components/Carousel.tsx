@@ -11,7 +11,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 export interface ModuleData {
   id: string;
@@ -91,6 +91,28 @@ export default function Carousel({
     setActiveIndex(Math.max(0, Math.min(index, modules.length - 1)));
   }, [modules.length]);
 
+  const touchStartX = useRef(0);
+  const isDragging = useRef(false);
+
+  const handleDragStart = useCallback((e: React.TouchEvent | React.MouseEvent) => {
+    touchStartX.current = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    isDragging.current = true;
+  }, []);
+
+  const handleDragEnd = useCallback((e: React.TouchEvent | React.MouseEvent) => {
+    if (!isDragging.current) return;
+    isDragging.current = false;
+    const endX = 'changedTouches' in e ? e.changedTouches[0].clientX : e.clientX;
+    const diff = touchStartX.current - endX;
+    if (Math.abs(diff) > 50) {
+      if (diff > 0) {
+        goTo(activeIndex + 1);
+      } else {
+        goTo(activeIndex - 1);
+      }
+    }
+  }, [activeIndex, goTo]);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'ArrowRight') {
@@ -141,7 +163,14 @@ export default function Carousel({
 
   return (
     <div className="relative w-screen left-1/2 -translate-x-1/2 mt-16 md:mt-24">
-      <div className="h-[500px] overflow-hidden relative">
+      <div
+        className="h-[500px] overflow-hidden relative select-none"
+        onTouchStart={handleDragStart}
+        onTouchEnd={handleDragEnd}
+        onMouseDown={handleDragStart}
+        onMouseUp={handleDragEnd}
+        onMouseLeave={() => { isDragging.current = false; }}
+      >
         {modules.map((mod, idx) => {
           const isLocked = !mod.unlocked;
           const centerOffset = idx - activeIndex;
@@ -156,7 +185,7 @@ export default function Carousel({
           let filter = 'blur(0px) brightness(100%)';
 
           if (centerOffset !== 0) {
-            translateX = (360 + (absOffset - 1) * 90) * direcao;
+            translateX = (300 + (absOffset - 1) * 70) * direcao;
             scale = 0.85 - absOffset * 0.02;
             opacity = 1;
             filter = 'blur(2px) brightness(85%)';

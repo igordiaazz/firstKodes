@@ -275,7 +275,7 @@ export default function Home() {
   return (
     <main className="flex min-h-screen w-full flex-col px-4 md:px-8 lg:px-16">
       <div className="flex flex-1 flex-col items-center justify-center">
-        <div className="mb-12 text-center">
+        <div className="mb-12 text-center pt-16 md:pt-0">
           <div className="mb-4 flex items-center justify-center gap-3">
             <div className="flex size-12 items-center justify-center rounded-xl bg-purple-600/20">
               <Terminal size={28} className="text-purple-400" />
