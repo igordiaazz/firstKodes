@@ -10,6 +10,7 @@ export const MODULE_NUMBERS: Record<string, number> = {
   decisoes: 2,
   repeticoes: 3,
   funcoes: 4,
+  modulo5: 5,
 };
 
 export function getModuleNumber(id: string): number {
@@ -140,6 +141,20 @@ export function useProgress() {
     setProgress(getDefaultProgress());
   }, []);
 
+  const adminCompleteAll = useCallback(() => {
+    setProgress((prev) => ({
+      ...prev,
+      unlockedModules: [1, 2, 3, 4, 5],
+      phasesCompleted: {
+        ...prev.phasesCompleted,
+        fundamentos: 6,
+        decisoes: 6,
+        repeticoes: 6,
+        funcoes: 6,
+      },
+    }));
+  }, []);
+
   return {
     progress,
     hydrated,
@@ -149,5 +164,6 @@ export function useProgress() {
     setCurrentModule,
     setModuleStartTime,
     resetProgress,
+    adminCompleteAll,
   };
 }

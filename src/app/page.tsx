@@ -1,12 +1,13 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Braces, Code, Flame, GitBranch, Loader2, Repeat, Settings, Terminal, X } from 'lucide-react';
+import { Braces, Code, Flame, GitBranch, Loader2, Repeat, Settings, Star, Terminal, X } from 'lucide-react';
 import { BlurReveal } from '@/components/BlurReveal';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Carousel from '@/components/Carousel';
 import Footer from '@/components/Footer';
 import GameLevel, { BOSS_CHALLENGES } from '@/components/GameLevel';
+import Module5Game from '@/components/Module5Game';
 import StreakCelebration from '@/components/StreakCelebration';
 import ModuleComplete from '@/components/ModuleComplete';
 import { moduleOneLevels } from '@/data/moduleOneLevels';
@@ -47,6 +48,12 @@ const MODULES_META = [
     description: 'Funções, arrays e listas encadeadas',
     icon: Braces,
   },
+  {
+    id: 'modulo5',
+    title: 'Desafios Finais',
+    description: 'Desafios de digitação com Python do zero',
+    icon: Star,
+  },
 ];
 
 const LEVELS_MAP: Record<string, LevelData[]> = {
@@ -54,6 +61,7 @@ const LEVELS_MAP: Record<string, LevelData[]> = {
   decisoes: moduleTwoLevels,
   repeticoes: moduleThreeLevels,
   funcoes: moduleFourLevels,
+  modulo5: [],
 };
 
 const MODULE_NAMES: Record<string, string> = {
@@ -61,6 +69,7 @@ const MODULE_NAMES: Record<string, string> = {
   decisoes: 'Decisões',
   repeticoes: 'Repetições',
   funcoes: 'Funções e Listas',
+  modulo5: 'Desafios Finais',
 };
 
 export default function Home() {
@@ -80,6 +89,7 @@ export default function Home() {
     completeModule,
     setModuleStartTime,
     resetProgress,
+    adminCompleteAll,
   } = useProgress();
 
   useEffect(() => {
@@ -104,7 +114,7 @@ export default function Home() {
         const levels = LEVELS_MAP[meta.id] ?? [];
         return {
           ...meta,
-          totalPhases: levels.length + (BOSS_CHALLENGES[meta.id] ? 1 : 0),
+          totalPhases: meta.id === 'modulo5' ? 5 : levels.length + (BOSS_CHALLENGES[meta.id] ? 1 : 0),
           phasesCompleted: progress.phasesCompleted[meta.id] ?? 0,
           unlocked: progress.unlockedModules.includes(num),
         };
@@ -166,6 +176,29 @@ export default function Home() {
     },
     [completePhase],
   );
+
+  if (view === 'game' && activeModuleId === 'modulo5') {
+    return (
+      <>
+        <Module5Game
+          onComplete={(phasesCompleted) => completePhase('modulo5', phasesCompleted)}
+          onModuleComplete={() => completeModule(5)}
+          onModuleCompleted={handleModuleCompleted}
+          onExit={handleExitGame}
+        />
+        {elapsedTime !== null && (
+          <ModuleComplete
+            elapsedMs={elapsedTime}
+            moduleTitle="Desafios Finais"
+            onClose={() => {
+              setElapsedTime(null);
+              handleExitGame();
+            }}
+          />
+        )}
+      </>
+    );
+  }
 
   if (view === 'game' && activeModuleId && LEVELS_MAP[activeModuleId]) {
     const levels = LEVELS_MAP[activeModuleId];
@@ -241,7 +274,7 @@ export default function Home() {
   }
 
   return (
-    <main className="flex min-h-screen w-full flex-col overflow-x-hidden px-4 md:px-8 lg:px-16">
+    <main className="flex min-h-screen w-full flex-col px-4 md:px-8 lg:px-16">
       <div className="flex flex-1 flex-col items-center justify-center">
         <div className="mb-12 text-center">
           <div className="mb-4 flex items-center justify-center gap-3">
@@ -263,6 +296,7 @@ export default function Home() {
             modules={modules}
             onStartModule={handleStartModule}
             onPracticeModule={handlePracticeModule}
+            onAdminUnlock={adminCompleteAll}
           />
         </div>
 
