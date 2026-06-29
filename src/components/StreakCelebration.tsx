@@ -16,7 +16,7 @@ export default function StreakCelebration({ show, onClose }: StreakCelebrationPr
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950/90 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm"
     >
       <motion.div
         initial={{ scale: 0.5, opacity: 0 }}
@@ -29,9 +29,9 @@ export default function StreakCelebration({ show, onClose }: StreakCelebrationPr
           transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
           className="drop-shadow-[0_0_30px_rgba(249,115,22,0.6)]"
         >
-          <Flame size={96} className="text-orange-500" />
+          <Flame size={96} className="text-orange-500 size-16 sm:size-24" />
         </motion.div>
-        <span className="mt-2 text-7xl font-black text-orange-500 drop-shadow-[0_0_20px_rgba(249,115,22,0.4)]">
+        <span className="mt-2 text-5xl sm:text-7xl font-black text-orange-500 drop-shadow-[0_0_20px_rgba(249,115,22,0.4)]">
           1
         </span>
         <h2 className="mt-6 text-center text-2xl font-bold text-zinc-50">

@@ -28,7 +28,7 @@ export default function ModuleComplete({ elapsedMs, moduleTitle, isPractice, onC
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950/90 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm"
     >
       <motion.div
         initial={{ scale: 0.5, opacity: 0 }}
@@ -41,7 +41,7 @@ export default function ModuleComplete({ elapsedMs, moduleTitle, isPractice, onC
           transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
           className="drop-shadow-[0_0_40px_rgba(168,85,247,0.6)]"
         >
-          <Crown size={80} className="text-purple-400" />
+          <Crown size={80} className="text-purple-400 size-16 sm:size-20" />
         </motion.div>
 
         <h2 className="mt-6 text-center text-2xl font-bold text-zinc-50 drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]">

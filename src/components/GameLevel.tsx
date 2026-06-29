@@ -115,7 +115,7 @@ export default function GameLevel({
 
   if (!isMounted) {
     return (
-      <div className="relative mx-auto flex min-h-screen w-full max-w-lg flex-col overflow-x-hidden bg-zinc-950 px-6">
+    <div className="relative mx-auto flex min-h-screen w-full max-w-lg flex-col bg-black px-6">
         <header className="flex items-center gap-2 pt-6 pb-4 md:gap-4">
           <div className="flex-1">
             <div className="mb-1.5">
@@ -207,7 +207,7 @@ export default function GameLevel({
   }
 
   return (
-    <div className="relative mx-auto flex min-h-screen w-full max-w-lg flex-col overflow-x-hidden bg-zinc-950 px-6">
+    <div className="relative mx-auto flex min-h-screen w-full max-w-lg flex-col overflow-x-hidden bg-black px-6">
       <header className="flex items-center gap-2 pt-6 pb-4 md:gap-4">
         <div className="flex-1">
           <div className="mb-1.5 flex items-center justify-between text-xs text-zinc-500">
@@ -252,7 +252,7 @@ export default function GameLevel({
         </div>
         <button
           onClick={handleExit}
-          className="flex size-8 items-center justify-center rounded-full bg-zinc-800 text-zinc-400 transition-colors hover:bg-zinc-700 hover:text-zinc-50"
+          className="flex size-9 items-center justify-center rounded-full bg-zinc-800 text-zinc-400 transition-colors hover:bg-zinc-700 hover:text-zinc-50"
           aria-label="Sair"
         >
           <X size={18} />
@@ -342,7 +342,7 @@ export default function GameLevel({
             onClick={() => handleChipClick(word)}
             disabled={selectedWord === word || feedback === 'success' || moduleLives <= 0}
             className={cn(
-              'rounded-lg px-4 py-2 text-sm font-medium transition-all',
+              'rounded-lg px-4 py-2 text-sm font-medium transition-all min-h-[44px]',
               selectedWord === word
                 ? 'bg-purple-600 text-white animate-ping-once'
                 : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700 hover:text-purple-400',

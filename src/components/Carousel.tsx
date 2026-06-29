@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  BarChart,
   Braces,
   CheckCircle2,
   ChevronLeft,
@@ -162,9 +163,9 @@ export default function Carousel({
   };
 
   return (
-    <div className="relative w-screen left-1/2 -translate-x-1/2 mt-16 md:mt-24">
+    <div className="relative w-full mt-16 md:mt-24">
       <div
-        className="h-[500px] overflow-hidden relative select-none"
+        className="h-[460px] md:h-[520px] overflow-hidden relative select-none"
         onTouchStart={handleDragStart}
         onTouchEnd={handleDragEnd}
         onMouseDown={handleDragStart}
@@ -178,14 +179,14 @@ export default function Carousel({
           const absOffset = Math.abs(centerOffset);
           const isActive = idx === activeIndex;
 
-          let translateX = 0;
+          let offsetX = 0;
           let scale = 1;
           const zIndex = 50 - absOffset;
           let opacity = 1;
           let filter = 'blur(0px) brightness(100%)';
 
           if (centerOffset !== 0) {
-            translateX = (300 + (absOffset - 1) * 70) * direcao;
+            offsetX = (300 + (absOffset - 1) * 70) * direcao;
             scale = 0.85 - absOffset * 0.02;
             opacity = 1;
             filter = 'blur(2px) brightness(85%)';
@@ -194,9 +195,9 @@ export default function Carousel({
           return (
             <div
               key={mod.id}
-              className="absolute inset-0 m-auto w-[85vw] max-w-[320px] h-[480px]"
+              className="absolute left-1/2 top-1/2 w-[85vw] max-w-[320px] lg:max-w-[400px] h-[440px] md:h-[480px]"
               style={{
-                transform: `translateX(${translateX}px) scale(${scale})`,
+                transform: `translateX(calc(-50% + ${offsetX}px)) translateY(-50%) scale(${scale})`,
                 zIndex,
                 opacity,
                 filter,
@@ -229,22 +230,32 @@ export default function Carousel({
                     <p className="text-sm text-white/60 mt-1.5 leading-relaxed line-clamp-2">
                       {mod.description}
                     </p>
+
                   </div>
 
                   <div className="flex-1 flex items-center justify-center">
                     <mod.icon
                       size={88}
                       className={cn(
-                        'md:size-24 transition-all duration-300',
+                        'size-16 md:size-20 lg:size-24 transition-all duration-300',
                         isLocked
-                          ? 'text-white/10 group-hover:scale-110'
+                          ? 'text-purple-400/30 group-hover:scale-110 drop-shadow-[0_0_15px_rgba(168,85,247,0.6)] drop-shadow-[0_0_40px_rgba(168,85,247,0.4)]'
                           : isActive
-                            ? 'text-purple-400/40 scale-110 drop-shadow-[0_0_12px_rgba(168,85,247,0.5)] drop-shadow-[0_0_35px_rgba(168,85,247,0.25)]'
-                            : 'text-purple-500/20 group-hover:text-purple-400/40 group-hover:scale-110 group-hover:drop-shadow-[0_0_15px_rgba(168,85,247,0.3)]',
+                            ? 'text-purple-400/70 scale-110 drop-shadow-[0_0_15px_rgba(168,85,247,0.9)] drop-shadow-[0_0_45px_rgba(168,85,247,0.6)] drop-shadow-[0_0_90px_rgba(168,85,247,0.3)]'
+                            : 'text-purple-400/50 group-hover:text-purple-400/70 group-hover:scale-110 drop-shadow-[0_0_15px_rgba(168,85,247,0.7)] drop-shadow-[0_0_40px_rgba(168,85,247,0.4)] group-hover:drop-shadow-[0_0_20px_rgba(168,85,247,0.9)] group-hover:drop-shadow-[0_0_50px_rgba(168,85,247,0.6)]',
                       )}
                     />
                   </div>
 
+                  <div className="flex items-center gap-4 mb-4 text-xs text-neutral-400 font-medium">
+                    <span className="px-2 py-1 text-[10px] font-semibold uppercase tracking-widest text-neutral-300 bg-white/5 border border-white/10 rounded-md">
+                      Lógica
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <BarChart size={14} className="text-neutral-500" />
+                      Iniciante
+                    </span>
+                  </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-white/60 font-medium">
                       {mod.phasesCompleted}/{mod.totalPhases} fases
@@ -271,6 +282,13 @@ export default function Carousel({
                           : 'Iniciar'}
                       </button>
                     )}
+                  </div>
+
+                  <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-white/10">
+                    <div
+                      className="h-full rounded-full bg-gradient-to-r from-purple-500 to-purple-400 transition-all duration-500"
+                      style={{ width: `${(mod.phasesCompleted / mod.totalPhases) * 100}%` }}
+                    />
                   </div>
                 </div>
               </div>
@@ -300,7 +318,7 @@ export default function Carousel({
 
       {showAdminPopup && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-          <div className="w-80 rounded-xl border border-zinc-800 bg-zinc-900 p-6 shadow-xl">
+          <div className="w-full max-w-sm sm:w-80 rounded-xl border border-zinc-800 bg-zinc-900 p-6 shadow-xl">
             <h2 className="mb-4 text-lg font-bold text-zinc-50">Acesso Administrativo</h2>
             <input
               type="password"

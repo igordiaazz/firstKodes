@@ -115,7 +115,7 @@ export default function Module5Game({
 
   if (fetching) {
     return (
-      <div className="flex min-h-screen w-full flex-col items-center justify-center bg-zinc-950 px-6">
+      <div className="flex min-h-screen w-full flex-col items-center justify-center bg-black px-6">
         <motion.div
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -131,7 +131,7 @@ export default function Module5Game({
 
   if (error) {
     return (
-      <div className="flex min-h-screen w-full flex-col items-center justify-center bg-zinc-950 px-6">
+      <div className="flex min-h-screen w-full flex-col items-center justify-center bg-black px-6">
         <motion.div
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -157,7 +157,7 @@ export default function Module5Game({
   const isLocked = lives === 0 || isCorrect === true;
 
   return (
-    <div className="relative mx-auto flex min-h-screen w-full max-w-lg flex-col overflow-x-hidden bg-zinc-950 px-6">
+    <div className="relative mx-auto flex min-h-screen w-full max-w-lg flex-col bg-black px-6">
       <header className="flex items-center gap-2 pt-6 pb-4 md:gap-4">
         <div className="flex-1">
           <div className="mb-1.5 flex items-center justify-between text-xs text-zinc-500">
@@ -184,7 +184,7 @@ export default function Module5Game({
         </div>
         <button
           onClick={onExit}
-          className="flex size-8 items-center justify-center rounded-full bg-zinc-800 text-zinc-400 transition-colors hover:bg-zinc-700 hover:text-zinc-50"
+          className="flex size-9 items-center justify-center rounded-full bg-zinc-800 text-zinc-400 transition-colors hover:bg-zinc-700 hover:text-zinc-50"
           aria-label="Sair"
         >
           <X size={18} />
@@ -228,7 +228,7 @@ export default function Module5Game({
           onChange={(e) => setCode(e.target.value)}
           disabled={isLocked}
           placeholder="Digite seu código aqui..."
-          rows={8}
+          rows={6}
           className="w-full resize-none rounded-xl border border-zinc-800 bg-zinc-900/80 p-5 font-mono text-base text-zinc-100 placeholder-zinc-600 caret-purple-400 transition-colors focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/20 disabled:cursor-not-allowed disabled:opacity-50 scrollbar-thin"
         />
       </motion.div>

@@ -73,7 +73,7 @@ export default function BossPhase({
   const isLocked = lives === 0 || isCorrect === true;
 
   return (
-    <div className="relative mx-auto flex min-h-screen w-full max-w-lg flex-col overflow-x-hidden bg-zinc-950 px-6">
+    <div className="relative mx-auto flex min-h-screen w-full max-w-lg flex-col bg-black px-6">
       {/* Header */}
       <header className="flex flex-wrap items-center gap-2 pt-6 pb-4 md:gap-4">
         <div className="flex min-w-0 flex-1 items-center gap-2">
@@ -101,7 +101,7 @@ export default function BossPhase({
         </div>
         <button
           onClick={onExit}
-          className="flex size-8 shrink-0 items-center justify-center rounded-full bg-zinc-800 text-zinc-400 transition-colors hover:bg-zinc-700 hover:text-zinc-50"
+          className="flex size-9 shrink-0 items-center justify-center rounded-full bg-zinc-800 text-zinc-400 transition-colors hover:bg-zinc-700 hover:text-zinc-50"
           aria-label="Sair"
         >
           <X size={18} />
@@ -136,7 +136,7 @@ export default function BossPhase({
           onChange={(e) => setCode(e.target.value)}
           disabled={isLocked}
           placeholder="Digite seu código aqui..."
-          rows={6}
+          rows={5}
           className="w-full resize-none rounded-xl border border-zinc-800 bg-zinc-900/80 p-5 font-mono text-base text-zinc-100 placeholder-zinc-600 caret-purple-400 transition-colors focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/20 disabled:cursor-not-allowed disabled:opacity-50 scrollbar-thin"
         />
       </motion.div>

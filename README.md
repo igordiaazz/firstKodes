@@ -10,6 +10,7 @@
     <img src="https://img.shields.io/badge/TypeScript-5.7-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript 5.7" />
     <img src="https://img.shields.io/badge/Tailwind_CSS-3.4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind CSS 3.4" />
     <img src="https://img.shields.io/badge/Framer_Motion-11.15-0055FF?style=for-the-badge&logo=framer&logoColor=white" alt="Framer Motion" />
+    <img src="https://img.shields.io/badge/Supabase-181818?style=for-the-badge&logo=supabase&logoColor=white" alt="Supabase" />
     <img src="https://img.shields.io/badge/OpenRouter_API-FF6B6B?style=for-the-badge&logo=openai&logoColor=white" alt="OpenRouter API" />
     <img src="https://img.shields.io/badge/ESLint-8.57-4B32C3?style=for-the-badge&logo=eslint&logoColor=white" alt="ESLint" />
   </p>
@@ -29,6 +30,7 @@
 | 🔀 | **Decisões** | Estruturas condicionais (`if`/`elif`/`else`) |
 | 🔁 | **Repetições** | Laços (`while`, `for`, `break`) |
 | 📦 | **Funções e Listas** | Definição de funções (`def`/`return`), listas e índices |
+| 🏆 | **Desafio Chefão** | Editor de código livre com tutoria do Clippy |
 
 ---
 
@@ -36,7 +38,8 @@
 
 - 🎮 **Fases Interativas** — Complete códigos selecionando palavras-chave ou descubra a saída do código
 - ❤️ **Sistema de Vidas** — 3 vidas por módulo; erre e aprenda com o feedback
-- 💾 **Progresso Persistente** — Salvo no `localStorage` com streaks e desbloqueio progressivo
+- 🔐 **Autenticação** — Login com Google ou GitHub via Supabase para salvar progresso na nuvem
+- 💾 **Progresso Persistente** — Salvo no `localStorage` (anônimo) ou no banco Supabase (logado), com streaks e desbloqueio progressivo
 - 🤖 **Modo Prática** — Gera 5 questões personalizadas por módulo via IA (completar código ou prever saída)
 - 👑 **Desafio Chefão** — Fase final com editor de código livre e tutoria do Clippy
 - 🦎 **Tutor IA (Clippy)** — Feedback contextual que se adapta ao número de vidas restantes
@@ -55,7 +58,9 @@
 | 🎨 | [Tailwind CSS](https://tailwindcss.com/) | 3.4 | Estilização utilitária |
 | 🌀 | [Framer Motion](https://www.framer.com/motion/) | 11.15 | Animações e transições |
 | 🎯 | [Lucide React](https://lucide.dev/) | 0.468 | Ícones |
+| 🗄️ | [Supabase](https://supabase.com/) | — | Autenticação e banco de dados |
 | 🧠 | [OpenRouter API](https://openrouter.ai/) | — | Integração com modelos de IA |
+| 🧩 | [shadcn/ui](https://ui.shadcn.com/) | — | Componentes de UI reutilizáveis |
 | 📐 | [ESLint](https://eslint.org/) | 8.57 | Linting |
 | 🎨 | [PostCSS](https://postcss.org/) / [Autoprefixer](https://github.com/postcss/autoprefixer) | — | Processamento CSS |
 
@@ -65,7 +70,7 @@
 
 ### Pré-requisitos
 
-- Node.js 18+ 
+- Node.js 18+
 - npm, yarn ou pnpm
 
 ### Instalação
@@ -78,12 +83,20 @@ cd firstkodes
 # Instale as dependências
 npm install
 
-# Configure a chave da API OpenRouter
+# Configure as variáveis de ambiente
 cp .env.local.example .env.local
-# Edite .env.local com sua chave:
-# OPENROUTER_API_KEY=sk-or-v1-xxxxxxxxxxxx
-# OPENROUTER_MODEL=google/gemini-2.5-flash (opcional)
+# Edite .env.local com suas chaves
 ```
+
+### Variáveis de Ambiente
+
+| Variável | Obrigatória | Descrição |
+|----------|-------------|-----------|
+| `OPENROUTER_API_KEY` | Sim | Chave da API OpenRouter para o tutor IA |
+| `OPENROUTER_MODEL` | Não | Modelo OpenRouter (padrão: `google/gemini-2.5-flash`) |
+| `NEXT_PUBLIC_SITE_URL` | Sim | URL do site (`http://localhost:3000` em dev) |
+| `NEXT_PUBLIC_SUPABASE_URL` | Sim | URL do projeto Supabase |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Sim | Chave anônima do Supabase |
 
 ### Desenvolvimento
 
@@ -102,16 +115,62 @@ npm start
 
 ---
 
+## Deploy na Vercel
+
+O projeto está configurado para deploy na [Vercel](https://vercel.com).
+
+### Passo a passo
+
+1. Conecte o repositório do GitHub à Vercel
+2. Adicione as variáveis de ambiente no dashboard da Vercel:
+
+   | Nome | Valor |
+   |------|-------|
+   | `NEXT_PUBLIC_SITE_URL` | `https://seu-site.vercel.app` |
+   | `NEXT_PUBLIC_SUPABASE_URL` | `https://oknxuqavmbpsshkzpnfn.supabase.co` |
+   | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | *(sua chave anônima)* |
+   | `OPENROUTER_API_KEY` | *(sua chave OpenRouter)* |
+
+3. Faça o deploy
+
+### Configuração dos Provedores OAuth
+
+Após o deploy, configure os provedores de login no Supabase e nos serviços externos:
+
+**No Supabase Dashboard** → Authentication → Providers:
+
+- **GitHub**: Copie a Callback URL gerada e registre no [GitHub OAuth Apps](https://github.com/settings/developers)
+- **Google**: Copie a Callback URL gerada e registre no [Google Cloud Console](https://console.cloud.google.com/apis/credentials)
+
+> As URLs de callback seguem o padrão: `https://<project>.supabase.co/auth/v1/callback`
+
+No GitHub OAuth App, configure:
+- **Homepage URL**: `https://seu-site.vercel.app`
+- **Authorization callback URL**: URL do Supabase
+
+No Google Cloud Console, configure:
+- **Authorized JavaScript origins**: `https://seu-site.vercel.app`
+- **Authorized redirect URIs**: URL do Supabase
+
+---
+
 ## Estrutura do Projeto
 
 ```
 src/
 ├── app/
+│   ├── (auth)/
+│   │   └── login/
+│   │       └── page.tsx           # Página de login (Google / GitHub)
 │   ├── api/
 │   │   ├── check-code/route.ts     # API de tutoria IA
-│   │   └── generate-practice/route.ts  # Geração de exercícios IA
+│   │   ├── generate-module5/route.ts # Geração de desafio chefão IA
+│   │   ├── generate-practice/route.ts # Geração de exercícios IA
+│   │   └── progress/route.ts       # API de progresso do usuário
+│   ├── auth/
+│   │   └── callback/route.ts       # Callback OAuth (troca código por sessão)
 │   ├── globals.css                 # Estilos globais + Tailwind
-│   ├── layout.tsx                  # Layout raiz (fonte Inter)
+│   ├── layout.tsx                  # Layout raiz (AuthProvider, fonte Inter)
 │   ├── page.tsx                    # Página principal
 │   └── icon.svg                    # Favicon / logo
 ├── components/
@@ -119,12 +178,21 @@ src/
 │   ├── Carousel.tsx                # Carrossel de módulos
 │   ├── Footer.tsx                  # Rodapé
 │   ├── GameLevel.tsx               # Fase principal (seleção de palavras)
-│   └── StreakCelebration.tsx       # Modal de streak
+│   ├── StreakCelebration.tsx       # Modal de streak
+│   └── User3DCard.tsx              # Card do perfil do usuário
+├── contexts/
+│   └── AuthContext.tsx             # Contexto de autenticação (Google, GitHub, signOut)
 ├── data/
 │   ├── moduleOneLevels.ts          # Fases do módulo 1 (Fundamentos)
 │   └── modulesConfig.ts            # Fases dos módulos 2, 3 e 4
 ├── hooks/
-│   └── useProgress.ts              # Hook de progresso (localStorage)
+│   ├── useProgress.ts              # Hook de progresso (localStorage)
+│   └── useScrollAnimation.ts      # Hook de animação de scroll
+├── lib/
+│   └── supabase/
+│       ├── client.ts               # Cliente Supabase (browser)
+│       └── server.ts               # Cliente Supabase (server)
+├── middleware.ts                   # Proteção de rotas (auth)
 └── types/
     └── css.d.ts                    # Declaração de tipos CSS
 ```
@@ -154,6 +222,20 @@ src/
   "moduleName": "Fundamentos"
 }
 ```
+
+### `POST /api/generate-module5`
+
+👑 Gera o desafio chefão (editor livre com enunciado).
+
+```json
+{
+  "moduleName": "Desafio Chefão"
+}
+```
+
+### `GET/POST /api/progress`
+
+💾 Gerencia o progresso do usuário autenticado no banco Supabase.
 
 ---
 

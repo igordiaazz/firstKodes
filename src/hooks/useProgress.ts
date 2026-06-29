@@ -1,6 +1,7 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 
 const STORAGE_KEY = 'firstkodes_progress';
 const MAX_LIVES = 3;
@@ -82,9 +83,35 @@ function writeStorage(data: ProgressData): void {
   }
 }
 
+function formatForCloud(data: ProgressData) {
+  return {
+    lives: data.lives,
+    unlockedModules: data.unlockedModules,
+    phases_completed: data.phasesCompleted,
+    streak: data.streak,
+    module_start_time: data.moduleStartTime,
+  };
+}
+
+async function pushToCloud(data: ProgressData): Promise<void> {
+  try {
+    await fetch('/api/progress', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formatForCloud(data)),
+    });
+  } catch {
+  }
+}
+
 export function useProgress() {
+  const { user } = useAuth();
   const [progress, setProgress] = useState<ProgressData>(getDefaultProgress);
   const [hydrated, setHydrated] = useState(false);
+  const cloudSyncTimer = useRef<ReturnType<typeof setTimeout>>();
+  const progressRef = useRef(progress);
+  const initialSyncDone = useRef(false);
+  progressRef.current = progress;
 
   useEffect(() => {
     setProgress(readStorage());
@@ -94,6 +121,50 @@ export function useProgress() {
   useEffect(() => {
     if (hydrated) writeStorage(progress);
   }, [progress, hydrated]);
+
+  useEffect(() => {
+    if (!hydrated || !user || initialSyncDone.current) return;
+    initialSyncDone.current = true;
+
+    const syncFromCloud = async () => {
+      try {
+        const res = await fetch('/api/progress');
+        if (!res.ok) return;
+        const cloudData = await res.json();
+        if (!cloudData) return;
+
+        const local = readStorage();
+        const cloudTime = new Date(cloudData.updated_at ?? 0).getTime();
+
+        if (cloudTime > local.moduleStartTime) {
+          setProgress({
+            lives: cloudData.lives ?? MAX_LIVES,
+            unlockedModules: cloudData.unlocked_modules ?? [1],
+            phasesCompleted: cloudData.phases_completed ?? {},
+            streak: cloudData.streak ?? 0,
+            moduleStartTime: cloudData.module_start_time ?? 0,
+          });
+        }
+      } catch {
+      }
+    };
+
+    syncFromCloud();
+  }, [hydrated, user]);
+
+  useEffect(() => {
+    if (!hydrated || !user) return;
+
+    if (cloudSyncTimer.current) clearTimeout(cloudSyncTimer.current);
+
+    cloudSyncTimer.current = setTimeout(() => {
+      pushToCloud(progressRef.current);
+    }, 2000);
+
+    return () => {
+      if (cloudSyncTimer.current) clearTimeout(cloudSyncTimer.current);
+    };
+  }, [progress, hydrated, user]);
 
   const loseLife = useCallback(() => {
     setProgress((prev) => ({

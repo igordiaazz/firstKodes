@@ -1,8 +1,23 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Braces, Code, Flame, GitBranch, Loader2, Repeat, Settings, Star, Terminal, X } from 'lucide-react';
+import {
+  Braces,
+  Code,
+  Flame,
+  GitBranch,
+  Loader2,
+  LogOut,
+  Repeat,
+  Settings,
+  Star,
+  User,
+  X,
+} from 'lucide-react';
+import User3DCard from '@/components/User3DCard';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { useRouter } from 'next/navigation';
 import Carousel from '@/components/Carousel';
 import Footer from '@/components/Footer';
 import GameLevel, { BOSS_CHALLENGES } from '@/components/GameLevel';
@@ -19,6 +34,34 @@ import { useProgress, getModuleNumber } from '@/hooks/useProgress';
 import type { LevelData } from '@/data/moduleOneLevels';
 import type { ModuleData } from '@/components/Carousel';
 import type { PracticeQuestion } from '@/app/api/generate-practice/route';
+
+const NAME_STORAGE_KEY = 'firstkodes_display_name';
+
+const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
+
+function Greeting({ userName }: { userName: string }) {
+  const [greeting] = useState(() => {
+    const list = ['Olá', 'E aí', 'Que bom te ver'];
+    return list[Math.floor(Math.random() * list.length)];
+  });
+
+  const fullText = userName ? `${greeting}, ${userName}!` : greeting;
+  const [chars, setChars] = useState(0);
+  const done = chars >= fullText.length;
+
+  useEffect(() => {
+    if (done) return;
+    const t = setTimeout(() => setChars((c) => c + 1), 80);
+    return () => clearTimeout(t);
+  }, [chars, done]);
+
+  return (
+    <span className="text-base font-bold text-zinc-50">
+      {fullText.slice(0, chars)}
+      {!done && <span className="ml-0.5 animate-blink-cursor text-purple-400">|</span>}
+    </span>
+  );
+}
 
 type View = 'home' | 'game';
 
@@ -72,9 +115,12 @@ const MODULE_NAMES: Record<string, string> = {
 };
 
 export default function Home() {
+  const { user, loading: authLoading, isConfigured, signOut } = useAuth();
+  const router = useRouter();
   const [view, setView] = useState<View>('home');
   const [activeModuleId, setActiveModuleId] = useState<string | null>(null);
   const [showSettings, setShowSettings] = useState(false);
+  const [showProfileCard, setShowProfileCard] = useState(false);
   const [showStreakCelebration, setShowStreakCelebration] = useState(false);
   const [elapsedTime, setElapsedTime] = useState<number | null>(null);
   const [practiceQuestions, setPracticeQuestions] = useState<PracticeQuestion[] | null>(null);
@@ -121,12 +167,15 @@ export default function Home() {
     [progress],
   );
 
-  const handleStartModule = useCallback((moduleId: string) => {
-    setActiveModuleId(moduleId);
-    setPracticeQuestions(null);
-    setView('game');
-    setModuleStartTime(Date.now());
-  }, [setModuleStartTime]);
+  const handleStartModule = useCallback(
+    (moduleId: string) => {
+      setActiveModuleId(moduleId);
+      setPracticeQuestions(null);
+      setView('game');
+      setModuleStartTime(Date.now());
+    },
+    [setModuleStartTime],
+  );
 
   const handleModuleCompleted = useCallback(() => {
     if (progress.moduleStartTime > 0) {
@@ -134,33 +183,36 @@ export default function Home() {
     }
   }, [progress.moduleStartTime]);
 
-  const handlePracticeModule = useCallback(async (moduleId: string) => {
-    setActiveModuleId(moduleId);
-    setPracticeQuestions(null);
-    setPracticeError(null);
-    setPracticeLoading(true);
-    setView('game');
-    setModuleStartTime(Date.now());
+  const handlePracticeModule = useCallback(
+    async (moduleId: string) => {
+      setActiveModuleId(moduleId);
+      setPracticeQuestions(null);
+      setPracticeError(null);
+      setPracticeLoading(true);
+      setView('game');
+      setModuleStartTime(Date.now());
 
-    try {
-      const res = await fetch('/api/generate-practice', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ moduleName: MODULE_NAMES[moduleId] ?? moduleId }),
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({ error: 'Erro ao gerar prática.' }));
-        setPracticeError(err.error ?? 'Erro ao gerar prática.');
-        return;
+      try {
+        const res = await fetch('/api/generate-practice', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ moduleName: MODULE_NAMES[moduleId] ?? moduleId }),
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({ error: 'Erro ao gerar prática.' }));
+          setPracticeError(err.error ?? 'Erro ao gerar prática.');
+          return;
+        }
+        const data = await res.json();
+        setPracticeQuestions(data.questions);
+      } catch {
+        setPracticeError('Erro de conexão ao gerar prática.');
+      } finally {
+        setPracticeLoading(false);
       }
-      const data = await res.json();
-      setPracticeQuestions(data.questions);
-    } catch {
-      setPracticeError('Erro de conexão ao gerar prática.');
-    } finally {
-      setPracticeLoading(false);
-    }
-  }, [setModuleStartTime]);
+    },
+    [setModuleStartTime],
+  );
 
   const handleExitGame = useCallback(() => {
     setActiveModuleId(null);
@@ -175,6 +227,57 @@ export default function Home() {
     },
     [completePhase],
   );
+
+  const handleSignOut = useCallback(async () => {
+    await signOut();
+    router.push('/login');
+  }, [signOut, router]);
+
+  const [customName, setCustomName] = useState<string | null>(null);
+  const [showNameModal, setShowNameModal] = useState(false);
+
+  useEffect(() => {
+    if (!user || !hydrated) return;
+    const hasOAuthName = !!(
+      user.user_metadata?.name ??
+      user.user_metadata?.full_name ??
+      user.user_metadata?.user_name ??
+      user.user_metadata?.display_name
+    );
+    const savedName = localStorage.getItem(NAME_STORAGE_KEY);
+
+    if (!hasOAuthName && !savedName) {
+      setShowNameModal(true);
+    }
+
+    if (savedName) {
+      setCustomName(savedName);
+    }
+  }, [user, hydrated]);
+
+  const rawName =
+    customName ??
+    user?.user_metadata?.name ??
+    user?.user_metadata?.full_name ??
+    user?.user_metadata?.user_name ??
+    user?.user_metadata?.display_name ??
+    user?.email?.split('@')[0] ??
+    'viajante';
+
+  const userName = rawName ? capitalize(rawName.split(' ')[0]) : '';
+
+  if (authLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-black">
+        <Loader2 size={32} className="animate-spin text-purple-400" />
+      </div>
+    );
+  }
+
+  if (isConfigured && !user) {
+    router.push('/login');
+    return null;
+  }
 
   if (view === 'game' && activeModuleId === 'modulo5') {
     return (
@@ -205,7 +308,7 @@ export default function Home() {
 
     if (practiceLoading) {
       return (
-        <div className="flex min-h-screen w-full flex-col items-center justify-center overflow-x-hidden bg-zinc-950 px-6">
+        <div className="flex min-h-screen w-full flex-col items-center justify-center overflow-x-hidden bg-black px-6">
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -225,7 +328,7 @@ export default function Home() {
 
     if (practiceError) {
       return (
-        <div className="flex min-h-screen w-full flex-col items-center justify-center overflow-x-hidden bg-zinc-950 px-6">
+        <div className="flex min-h-screen w-full flex-col items-center justify-center overflow-x-hidden bg-black px-6">
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -244,7 +347,7 @@ export default function Home() {
       );
     }
 
-    const moduleTitle = MODULES_META.find(m => m.id === activeModuleId)?.title ?? '';
+    const moduleTitle = MODULES_META.find((m) => m.id === activeModuleId)?.title ?? '';
     return (
       <>
         <GameLevel
@@ -273,29 +376,42 @@ export default function Home() {
   }
 
   return (
-    <main className="flex min-h-screen w-full flex-col px-4 md:px-8 lg:px-16">
-      <div className="flex flex-1 flex-col items-center justify-center">
-        <div className="mb-12 text-center pt-16 md:pt-0">
-          <div className="mb-4 flex items-center justify-center gap-3">
-            <div className="flex size-12 items-center justify-center rounded-xl bg-purple-600/20">
-              <Terminal size={28} className="text-purple-400" />
-            </div>
-            <h1 className="text-3xl font-extrabold tracking-tight text-zinc-50 sm:text-4xl">
-              first<span className="text-purple-400">Kodes</span>
-            </h1>
+    <main className="flex min-h-screen w-full flex-col px-5 md:px-8 lg:px-16">
+      <header className="flex items-center justify-between pt-6 pb-2">
+        <Greeting userName={userName} />
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 rounded-full bg-zinc-900/80 px-2.5 py-1 backdrop-blur-sm sm:px-3 sm:py-1.5">
+            <Flame size={16} className="text-orange-500 sm:size-[18px]" />
+            <span className="text-xs font-semibold text-zinc-50 sm:text-sm">
+              {progress.streak}
+            </span>
           </div>
-          <p className="text-base text-zinc-600 sm:text-lg">
-            Sua jornada na programação começa aqui
-          </p>
+          <button
+            onClick={() => setShowSettings(true)}
+            className="flex size-9 items-center justify-center rounded-full bg-zinc-900/80 text-zinc-400 backdrop-blur-sm transition-colors hover:text-zinc-50 sm:size-10"
+            aria-label="Configurações"
+          >
+            <Settings size={16} className="sm:size-5" />
+          </button>
+          {user && (
+            <button
+              onClick={() => setShowProfileCard(true)}
+              className="flex size-9 items-center justify-center rounded-full bg-zinc-900/80 text-zinc-400 backdrop-blur-sm transition-colors hover:text-zinc-50 sm:size-10"
+              aria-label="Perfil"
+            >
+              <User size={16} className="sm:size-5" />
+            </button>
+          )}
         </div>
-        <div>
-          <Carousel
-            modules={modules}
-            onStartModule={handleStartModule}
-            onPracticeModule={handlePracticeModule}
-            onAdminUnlock={adminCompleteAll}
-          />
-        </div>
+      </header>
+
+      <div className="flex flex-1 flex-col items-center justify-center -mt-8">
+        <Carousel
+          modules={modules}
+          onStartModule={handleStartModule}
+          onPracticeModule={handlePracticeModule}
+          onAdminUnlock={adminCompleteAll}
+        />
 
         <StreakCelebration
           show={showStreakCelebration}
@@ -307,29 +423,84 @@ export default function Home() {
         <Footer />
       </footer>
 
-      <div className="fixed top-4 right-4 z-50 sm:top-6 sm:right-8">
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1.5 rounded-full bg-zinc-900/80 px-2.5 py-1 backdrop-blur-sm sm:px-3 sm:py-1.5">
-            <Flame size={16} className="text-orange-500 sm:size-[18px]" />
-            <span className="text-xs font-semibold text-zinc-50 sm:text-sm">{progress.streak}</span>
-          </div>
-          <button
-            onClick={() => setShowSettings(true)}
-            className="flex size-8 items-center justify-center rounded-full bg-zinc-900/80 text-zinc-400 backdrop-blur-sm transition-colors hover:text-zinc-50 sm:size-10"
-            aria-label="Configurações"
+      {showNameModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="relative w-full max-w-sm sm:w-80 rounded-xl border border-zinc-800 bg-zinc-900 p-6 shadow-xl"
           >
-            <Settings size={16} className="sm:size-5" />
-          </button>
+            <h2 className="mb-2 text-lg font-bold text-zinc-50">Como quer ser chamado?</h2>
+            <p className="mb-6 text-sm text-zinc-500">
+              Escolha um nome para aparecer nas saudações
+            </p>
+            <input
+              type="text"
+              id="nameInput"
+              placeholder="Seu nome"
+              autoFocus
+              maxLength={20}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && (e.target as HTMLInputElement).value.trim()) {
+                  const name = capitalize((e.target as HTMLInputElement).value.trim());
+                  localStorage.setItem(NAME_STORAGE_KEY, name);
+                  setCustomName(name);
+                  setShowNameModal(false);
+                }
+              }}
+              className="mb-4 w-full rounded-xl border border-zinc-700 bg-zinc-800 px-4 py-3 text-sm text-zinc-100 placeholder-zinc-500 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500 focus:outline-none"
+            />
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowNameModal(false)}
+                className="flex-1 rounded-xl border border-zinc-700 px-4 py-3 text-sm font-medium text-zinc-400 transition-colors hover:bg-zinc-800"
+              >
+                Pular
+              </button>
+              <button
+                onClick={() => {
+                  const input = document.getElementById('nameInput') as HTMLInputElement;
+                  if (input.value.trim()) {
+                    const name = capitalize(input.value.trim());
+                    localStorage.setItem(NAME_STORAGE_KEY, name);
+                    setCustomName(name);
+                    setShowNameModal(false);
+                  }
+                }}
+                className="flex-1 rounded-xl bg-white px-4 py-3 text-sm font-semibold text-black transition-colors hover:bg-zinc-200"
+              >
+                Salvar
+              </button>
+            </div>
+          </motion.div>
         </div>
-      </div>
+      )}
+
+      {showProfileCard && user && (
+        <User3DCard
+          displayName={userName}
+          fullName={rawName}
+          email={user.email ?? undefined}
+          provider={user.app_metadata?.provider}
+          onClose={() => setShowProfileCard(false)}
+        />
+      )}
 
       {showSettings && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="relative w-80 rounded-xl border border-zinc-800 bg-zinc-900 p-6 shadow-xl"
+            className="relative w-full max-w-sm sm:w-80 rounded-xl border border-zinc-800 bg-zinc-900 p-6 shadow-xl"
           >
+            <button
+              onClick={() => setShowSettings(false)}
+              className="absolute top-4 right-4 text-zinc-500 hover:text-zinc-300 transition-colors"
+              aria-label="Fechar"
+            >
+              <X size={18} />
+            </button>
+
             <div className="mb-4 flex items-center gap-3">
               <div className="flex size-10 items-center justify-center rounded-lg bg-purple-600/20">
                 <Settings size={20} className="text-purple-400" />
@@ -358,6 +529,19 @@ export default function Home() {
                 Resetar
               </button>
             </div>
+
+            {user && (
+              <>
+                <div className="mt-4 border-t border-zinc-800" />
+                <button
+                  onClick={handleSignOut}
+                  className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg border border-zinc-700 px-4 py-3 text-sm font-semibold text-zinc-300 transition-colors hover:bg-zinc-800"
+                >
+                  <LogOut size={16} />
+                  Sair
+                </button>
+              </>
+            )}
           </motion.div>
         </div>
       )}
