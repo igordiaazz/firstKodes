@@ -118,7 +118,7 @@ export default function LoginPage() {
               className="flex items-center gap-1 transition-colors hover:text-purple-400"
             >
               Igor Dias
-              <FontAwesomeIcon icon={faGithub} style={{ color: 'rgb(255, 255, 255)' }} />
+              <FontAwesomeIcon icon={faGithub} className="text-zinc-600" />
             </a>
           </p>
         </div>
