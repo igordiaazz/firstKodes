@@ -1,4 +1,5 @@
-import { Github } from 'lucide-react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faGithub } from '@fortawesome/free-brands-svg-icons';
 
 export default function Footer() {
   return (
@@ -12,7 +13,7 @@ export default function Footer() {
           className="flex items-center gap-1 transition-colors hover:text-purple-400"
         >
           Igor Dias
-          <Github className="h-4 w-4" />
+          <FontAwesomeIcon icon={faGithub} style={{ color: 'rgb(255, 255, 255)' }} />
         </a>
       </div>
     </footer>

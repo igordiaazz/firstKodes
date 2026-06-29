@@ -1,6 +1,8 @@
 'use client';
 
 import { Loader2, Github } from 'lucide-react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faGithub } from '@fortawesome/free-brands-svg-icons';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
@@ -90,14 +92,14 @@ export default function LoginPage() {
   return (
     <main className="grid min-h-screen lg:grid-cols-2">
       {/* Left — Brand */}
-      <div className="relative overflow-hidden hidden flex-col bg-[#050505] p-12 lg:flex">
+      <div className="relative overflow-hidden flex flex-col bg-[#050505] px-6 pb-10 pt-8 lg:p-12">
         <div className="text-base font-bold text-purple-400">
           firstKodes
         </div>
 
-        <div className="flex flex-1 items-center justify-center -mt-5">
+        <div className="flex flex-1 items-center justify-center lg:-mt-5">
           <div className="max-w-lg">
-            <p className="text-5xl font-bold leading-tight tracking-tight text-white sm:text-6xl">
+            <p className="text-3xl font-bold leading-tight tracking-tight text-white sm:text-5xl lg:text-6xl">
               firstKodes é onde você{' '}
               <span className="text-purple-400">
                 <Typewriter />
@@ -107,8 +109,17 @@ export default function LoginPage() {
         </div>
 
         <div>
-          <p className="text-sm text-zinc-600">
-            made with luv by Igor Dias
+          <p className="text-sm text-zinc-600 flex items-center gap-1">
+            made with luv by{' '}
+            <a
+              href="https://github.com/igordiaazz"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 transition-colors hover:text-purple-400"
+            >
+              Igor Dias
+              <FontAwesomeIcon icon={faGithub} style={{ color: 'rgb(255, 255, 255)' }} />
+            </a>
           </p>
         </div>
       </div>

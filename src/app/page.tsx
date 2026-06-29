@@ -37,7 +37,30 @@ import type { PracticeQuestion } from '@/app/api/generate-practice/route';
 
 const NAME_STORAGE_KEY = 'firstkodes_display_name';
 
-const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
+const PARTICLES = new Set(['de', 'da', 'do', 'das', 'dos', 'e']);
+
+function capitalize(s: string): string {
+  return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
+}
+
+function formatName(name: string, maxWords: number = 0): string {
+  const words = name.trim().split(/\s+/);
+  const selected = maxWords > 0 ? words.slice(0, maxWords) : words;
+  return selected
+    .map(w => w.toLowerCase())
+    .map(w => PARTICLES.has(w) ? w : capitalize(w))
+    .join(' ');
+}
+
+function getProfileDisplayName(name: string): string {
+  const words = name.trim().split(/\s+/);
+  if (words.length === 0) return '';
+  const first = capitalize(words[0].toLowerCase());
+  if (words.length < 2) return first;
+  const second = words[1].toLowerCase();
+  if (PARTICLES.has(second)) return first;
+  return `${first} ${capitalize(second)}`;
+}
 
 function Greeting({ userName }: { userName: string }) {
   const [greeting] = useState(() => {
@@ -264,7 +287,8 @@ export default function Home() {
     user?.email?.split('@')[0] ??
     'viajante';
 
-  const userName = rawName ? capitalize(rawName.split(' ')[0]) : '';
+  const userName = rawName ? formatName(rawName, 1) : '';
+  const profileDisplayName = rawName ? getProfileDisplayName(rawName) : '';
 
   if (authLoading) {
     return (
@@ -442,7 +466,7 @@ export default function Home() {
               maxLength={20}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && (e.target as HTMLInputElement).value.trim()) {
-                  const name = capitalize((e.target as HTMLInputElement).value.trim());
+                  const name = formatName((e.target as HTMLInputElement).value.trim());
                   localStorage.setItem(NAME_STORAGE_KEY, name);
                   setCustomName(name);
                   setShowNameModal(false);
@@ -461,7 +485,7 @@ export default function Home() {
                 onClick={() => {
                   const input = document.getElementById('nameInput') as HTMLInputElement;
                   if (input.value.trim()) {
-                    const name = capitalize(input.value.trim());
+                    const name = formatName(input.value.trim());
                     localStorage.setItem(NAME_STORAGE_KEY, name);
                     setCustomName(name);
                     setShowNameModal(false);
@@ -479,7 +503,7 @@ export default function Home() {
       {showProfileCard && user && (
         <User3DCard
           displayName={userName}
-          fullName={rawName}
+          fullName={profileDisplayName}
           email={user.email ?? undefined}
           provider={user.identities?.[0]?.provider ?? user.app_metadata?.provider}
           onClose={() => setShowProfileCard(false)}
