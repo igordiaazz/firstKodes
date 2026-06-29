@@ -481,7 +481,7 @@ export default function Home() {
           displayName={userName}
           fullName={rawName}
           email={user.email ?? undefined}
-          provider={user.app_metadata?.provider}
+          provider={user.identities?.[0]?.provider ?? user.app_metadata?.provider}
           onClose={() => setShowProfileCard(false)}
         />
       )}

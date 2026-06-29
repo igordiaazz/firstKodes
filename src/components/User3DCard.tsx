@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { useEffect } from 'react';
+import { useRef, useState, type ElementType } from 'react';
 import { Github } from 'lucide-react';
 import { GlareCard } from '@/components/ui/glare-card';
 
@@ -36,9 +36,9 @@ function GoogleIcon({ size }: { size: number }) {
   );
 }
 
-const PROVIDER_INFO: Record<string, { label: string; icon: typeof Github }> = {
+const PROVIDER_INFO: Record<string, { label: string; icon: ElementType }> = {
   github: { label: 'Autenticado via GitHub', icon: Github },
-  google: { label: 'Autenticado via Google', icon: Github },
+  google: { label: 'Autenticado via Google', icon: GoogleIcon },
 };
 
 function ProviderIcon({ provider }: { provider: string }) {
@@ -56,13 +56,19 @@ export default function User3DCard({
   provider,
   onClose,
 }: User3DCardProps) {
-  useEffect(() => {
-    const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    window.addEventListener('keydown', handleEsc);
-    return () => window.removeEventListener('keydown', handleEsc);
-  }, [onClose]);
+  const [autoRotating, setAutoRotating] = useState(false);
+  const lastTapRef = useRef(0);
+
+  const handleCardClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const now = Date.now();
+    if (now - lastTapRef.current < 300) {
+      setAutoRotating((prev) => !prev);
+      lastTapRef.current = 0;
+    } else {
+      lastTapRef.current = now;
+    }
+  };
 
   return (
     <motion.div
@@ -72,33 +78,45 @@ export default function User3DCard({
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xl"
       onClick={onClose}
     >
-      <div onClick={(e) => e.stopPropagation()}>
-        <GlareCard className="bg-zinc-900">
-          <div className="relative flex flex-col h-full p-8 pb-6 text-white">
-            <div className="flex-1 flex items-center justify-center">
-              <svg width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-400">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                <circle cx="12" cy="7" r="4" />
-              </svg>
-            </div>
+      <div onClick={handleCardClick} className="[perspective:800px]">
+        <motion.div
+          style={{ transformStyle: 'preserve-3d' }}
+          animate={{ rotateY: autoRotating ? 360 : 0 }}
+          transition={autoRotating
+            ? { duration: 8, ease: 'linear', repeat: Infinity }
+            : { type: 'spring', stiffness: 200, damping: 20 }
+          }
+        >
+          <GlareCard className="bg-zinc-900">
+            <div className="relative flex flex-col h-full p-8 pb-6 text-white">
+              <div className="flex-1 flex items-center justify-center">
+                <svg width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-400">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                  <circle cx="12" cy="7" r="4" />
+                </svg>
+              </div>
 
-            <div>
-              <h2 className="text-2xl font-bold text-white">{fullName || displayName}</h2>
-              <p className="text-base text-slate-300 mt-1">
-                {email || 'Aprendendo a programar em C'}
-              </p>
+              <div>
+                <h2 className="text-2xl font-bold text-white">{fullName || displayName}</h2>
+                <p className="text-base text-slate-300 mt-1">
+                  {email || 'Aprendendo a programar em C'}
+                </p>
 
-              {provider && (
-                <div className="flex items-center gap-1.5 rounded-md border border-white/10 bg-white/5 px-2.5 py-1.5 mt-4 w-fit">
-                  <ProviderIcon provider={provider} />
-                  <span className="text-[11px] font-medium text-slate-300">
-                    {PROVIDER_INFO[provider]?.label ?? provider}
-                  </span>
-                </div>
-              )}
+                {provider && (
+                  <div className="flex items-center gap-1.5 rounded-md border border-white/10 bg-white/5 px-2.5 py-1.5 mt-4 w-fit">
+                    <ProviderIcon provider={provider} />
+                    <span className="text-[11px] font-medium text-slate-300">
+                      {PROVIDER_INFO[provider]?.label ?? provider}
+                    </span>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        </GlareCard>
+          </GlareCard>
+        </motion.div>
+        <p className="mt-4 text-center text-[13px] text-zinc-500">
+          clique fora do card para voltar
+        </p>
       </div>
     </motion.div>
   );
