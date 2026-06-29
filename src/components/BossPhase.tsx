@@ -134,6 +134,18 @@ export default function BossPhase({
         <textarea
           value={code}
           onChange={(e) => setCode(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Tab') {
+              e.preventDefault();
+              const ta = e.currentTarget;
+              const start = ta.selectionStart;
+              const end = ta.selectionEnd;
+              setCode(code.substring(0, start) + '  ' + code.substring(end));
+              requestAnimationFrame(() => {
+                ta.selectionStart = ta.selectionEnd = start + 2;
+              });
+            }
+          }}
           disabled={isLocked}
           placeholder="Digite seu código aqui..."
           rows={5}

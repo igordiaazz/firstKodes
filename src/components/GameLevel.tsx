@@ -1,9 +1,13 @@
 'use client';
 
 import { AnimatePresence, motion } from 'framer-motion';
-import { Bot, Heart, Loader2, X } from 'lucide-react';
+import { Heart, Loader2, X } from 'lucide-react';
+import confetti from 'canvas-confetti';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import BossPhase from '@/components/BossPhase';
+import Mascot from '@/components/Mascot';
+import TermTooltip from '@/components/TermTooltip';
+import { TERMS } from '@/data/termsDictionary';
 import { cn } from '@/lib/utils';
 import { getModuleNumber } from '@/hooks/useProgress';
 import type { LevelData } from '@/data/moduleOneLevels';
@@ -85,6 +89,8 @@ export default function GameLevel({
   const [selectedWord, setSelectedWord] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<'idle' | 'success' | 'error'>('idle');
   const [mascotMessage, setMascotMessage] = useState<string | null>(null);
+  const [mascotStatus, setMascotStatus] = useState<'idle' | 'typing' | 'error' | 'success'>('idle');
+  const errorTimerRef = useRef<ReturnType<typeof setTimeout>>();
   const [isMounted, setIsMounted] = useState(false);
   const isBossPhase = !practiceQuestions && currentLevelIndex >= levels.length;
   const bossChallenge = practiceQuestions ? undefined : BOSS_CHALLENGES[moduleId];
@@ -102,6 +108,8 @@ export default function GameLevel({
     setSelectedWord(null);
     setFeedback('idle');
     setMascotMessage(null);
+    setMascotStatus('idle');
+    clearTimeout(errorTimerRef.current);
   }, [currentLevelIndex, isBossPhase]);
 
   const hasCalledPracticeRef = useRef(false);
@@ -147,6 +155,7 @@ export default function GameLevel({
   const handleChipClick = (word: string) => {
     setSelectedWord(word);
     setFeedback('idle');
+    setMascotStatus('typing');
     if (feedback === 'error') {
       setMascotMessage(null);
     }
@@ -158,6 +167,11 @@ export default function GameLevel({
       setModuleLives(nextLives);
       setFeedback('error');
       setMascotMessage('Oops!');
+      setMascotStatus('error');
+      clearTimeout(errorTimerRef.current);
+      errorTimerRef.current = setTimeout(() => {
+        setMascotStatus('idle');
+      }, 1500);
       if (nextLives <= 0) {
         setTimeout(() => {
           onExit();
@@ -168,6 +182,13 @@ export default function GameLevel({
 
     setFeedback('success');
     setMascotMessage(null);
+    setMascotStatus('success');
+    confetti({
+      particleCount: 80,
+      spread: 60,
+      origin: { y: 0.5 },
+      colors: ['#a855f7', '#c084fc', '#ffffff', '#1e1b4b'],
+    });
     const nextIndex = currentLevelIndex + 1;
 
     if (!practiceQuestions) {
@@ -266,9 +287,7 @@ export default function GameLevel({
         transition={{ delay: 0.2 }}
         className="mb-6 flex items-start gap-3"
       >
-        <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-purple-600/20">
-          <Bot size={28} className="text-purple-400" />
-        </div>
+        <Mascot status={mascotStatus} />
         <div className="relative rounded-2xl rounded-tl-sm bg-zinc-900 px-5 py-4 shadow-lg">
           <div className="absolute -left-1.5 top-4 h-3 w-3 rotate-45 bg-zinc-900" />
           <p className="text-sm leading-relaxed text-zinc-300">
@@ -276,6 +295,30 @@ export default function GameLevel({
           </p>
         </div>
       </motion.div>
+
+      {level.lessonText && (
+        <motion.p
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.28 }}
+          className="mb-6 text-sm leading-relaxed text-zinc-400"
+        >
+          {level.lessonText.split(/(\[[^\]]+\])/).map((part, i) => {
+            const match = part.match(/^\[([^\]]+)\]$/);
+            if (match) {
+              const term = match[1];
+              return (
+                <TermTooltip
+                  key={i}
+                  term={term}
+                  definition={TERMS[term] ?? term}
+                />
+              );
+            }
+            return part;
+          })}
+        </motion.p>
+      )}
 
       {level.type === 'output' ? (
         <motion.div

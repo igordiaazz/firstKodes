@@ -248,6 +248,9 @@ export default function Carousel({
                   </div>
 
                   <div className="flex items-center gap-4 mb-4 text-xs text-neutral-400 font-medium">
+                    <span className="px-2 py-1 text-[10px] font-semibold uppercase tracking-widest text-purple-300 bg-purple-500/10 border border-purple-500/30 rounded-md">
+                      Python
+                    </span>
                     <span className="px-2 py-1 text-[10px] font-semibold uppercase tracking-widest text-neutral-300 bg-white/5 border border-white/10 rounded-md">
                       Lógica
                     </span>
