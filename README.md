@@ -32,14 +32,30 @@
 | 📦 | **Funções e Listas** | Definição de funções (`def`/`return`), listas e índices |
 | 🏆 | **Desafio Chefão** | Editor de código livre com tutoria do Clippy |
 
+### Sistema de Pontuação (KodeScore)
+
+Cada módulo tem um valor base de pontos por fase de escolha; fases de digitação (boss) valem o dobro:
+
+| Módulo | Base | 5 escolhas | 1 boss | Total |
+|--------|------|-----------|--------|-------|
+| 🔤 Fundamentos | 15 | 75 | 30 | 105 |
+| 🔀 Decisões | 20 | 100 | 40 | 140 |
+| 🔁 Repetições | 25 | 125 | 50 | 175 |
+| 📦 Funções e Listas | 30 | 150 | 60 | 210 |
+| 🏆 Desafios Finais | 35 | 175 | 70 | 350 |
+| **Total geral** | | | | **980** |
+
+Os pontos são acumulados ao longo de toda a jornada e exibidos no cabeçalho com animação (NumberTicker).
+
 ---
 
 ## Funcionalidades
 
 - 🎮 **Fases Interativas** — Complete códigos selecionando palavras-chave ou descubra a saída do código
 - ❤️ **Sistema de Vidas** — 3 vidas por módulo; erre e aprenda com o feedback
+- ⭐ **Sistema de Pontos (KodeScore)** — Ganhe pontos a cada fase concluída (15 a 35 por escolha, dobro na digitação). Pontuação por módulo aumenta progressivamente
 - 🔐 **Autenticação** — Login com Google ou GitHub via Supabase para salvar progresso na nuvem
-- 💾 **Progresso Persistente** — Salvo no `localStorage` (anônimo) ou no banco Supabase (logado), com streaks e desbloqueio progressivo
+- 💾 **Progresso Persistente** — Salvo no `localStorage` (anônimo) ou no banco Supabase (logado), com streaks, desbloqueio progressivo e KodeScore
 - 🤖 **Modo Prática** — Gera 5 questões personalizadas por módulo via IA (completar código ou prever saída)
 - 👑 **Desafio Chefão** — Fase final com editor de código livre e tutoria do Clippy
 - 🦎 **Tutor IA (Clippy)** — Feedback contextual que se adapta ao número de vidas restantes
@@ -235,7 +251,18 @@ src/
 
 ### `GET/POST /api/progress`
 
-💾 Gerencia o progresso do usuário autenticado no banco Supabase.
+💾 Gerencia o progresso do usuário autenticado no banco Supabase. Inclui `kode_score` (pontuação total acumulada).
+
+```json
+{
+  "lives": 3,
+  "unlocked_modules": [1, 2],
+  "phases_completed": { "fundamentos": 6 },
+  "streak": 3,
+  "module_start_time": 1747000000000,
+  "kode_score": 245
+}
+```
 
 ---
 

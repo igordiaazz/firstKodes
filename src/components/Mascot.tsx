@@ -35,6 +35,7 @@ export default function Mascot({ status }: MascotProps) {
 
   return (
     <motion.div
+      key={status}
       animate={animate}
       transition={transition}
       className={cn(

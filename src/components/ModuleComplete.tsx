@@ -1,13 +1,17 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Clock, Crown } from 'lucide-react';
+import { Clock, Bot, Sparkles } from 'lucide-react';
+import { useEffect } from 'react';
+import confetti from 'canvas-confetti';
+import { NumberTicker } from '@/components/ui/number-ticker';
 
 interface ModuleCompleteProps {
   elapsedMs: number;
   moduleTitle: string;
   isPractice?: boolean;
   onClose: () => void;
+  kodeScore: number;
 }
 
 function formatTime(ms: number): string {
@@ -20,8 +24,17 @@ function formatTime(ms: number): string {
   return `${seconds}s`;
 }
 
-export default function ModuleComplete({ elapsedMs, moduleTitle, isPractice, onClose }: ModuleCompleteProps) {
+export default function ModuleComplete({ elapsedMs, moduleTitle, isPractice, onClose, kodeScore }: ModuleCompleteProps) {
   const timeStr = formatTime(elapsedMs);
+
+  useEffect(() => {
+    confetti({
+      particleCount: 80,
+      spread: 60,
+      origin: { y: 0.5 },
+      colors: ['#a855f7', '#c084fc', '#ffffff', '#1e1b4b'],
+    });
+  }, []);
 
   return (
     <motion.div
@@ -37,11 +50,17 @@ export default function ModuleComplete({ elapsedMs, moduleTitle, isPractice, onC
         className="flex flex-col items-center px-6"
       >
         <motion.div
-          animate={{ scale: [1, 1.1, 1] }}
-          transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-          className="drop-shadow-[0_0_40px_rgba(168,85,247,0.6)]"
+          initial={{ scale: 0, y: 40, opacity: 0 }}
+          animate={{ scale: 1, y: 0, opacity: 1 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 15 }}
+          className="flex size-20 items-center justify-center rounded-2xl bg-purple-600/20 drop-shadow-[0_0_40px_rgba(168,85,247,0.6)]"
         >
-          <Crown size={80} className="text-purple-400 size-16 sm:size-20" />
+          <motion.div
+            animate={{ y: [0, -3, 0] }}
+            transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+          >
+            <Bot size={48} className="text-purple-300" />
+          </motion.div>
         </motion.div>
 
         <h2 className="mt-6 text-center text-2xl font-bold text-zinc-50 drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]">
@@ -52,11 +71,24 @@ export default function ModuleComplete({ elapsedMs, moduleTitle, isPractice, onC
           <p className="mt-1 text-sm text-zinc-500">Fases extras</p>
         )}
 
-        <div className="mt-6 flex items-center gap-2 rounded-xl border border-purple-500/30 bg-purple-600/10 px-6 py-3 shadow-[0_0_20px_rgba(168,85,247,0.2)]">
-          <Clock size={22} className="text-purple-300" />
-          <span className="text-2xl font-bold text-purple-300 drop-shadow-[0_0_10px_rgba(168,85,247,0.5)]">
-            {timeStr}
-          </span>
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+          <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-zinc-900/80 p-4">
+            <Clock size={24} className="text-purple-400 shrink-0" />
+            <div>
+              <p className="text-xs text-zinc-500">Tempo</p>
+              <p className="text-xl font-bold text-zinc-50">{timeStr}</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-zinc-900/80 p-4">
+            <Sparkles size={24} className="text-purple-400 shrink-0" />
+            <div>
+              <p className="text-xs text-zinc-500">KodeScore</p>
+              <p className="text-xl font-bold text-zinc-50">
+                <NumberTicker value={kodeScore} />
+              </p>
+            </div>
+          </div>
         </div>
 
         <motion.button

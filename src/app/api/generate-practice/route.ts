@@ -53,7 +53,9 @@ REGRAS IMPORTANTES:
 - type "output": o codeSnippet NÃO DEVE conter [ _____ ], mostre o código completo
 - Use type "output" para perguntas como: "O que esse código imprime?", "Qual o valor final de x?"
 - Use type "complete" para perguntas como: "Qual comando completa o código?", "Preencha a lacuna"
-- Misture os dois tipos nas 5 questões: 2-3 do tipo "complete" e 2-3 do tipo "output"`;
+- Misture os dois tipos nas 5 questões: 2-3 do tipo "complete" e 2-3 do tipo "output"
+- IMPORTANTE: Cada questão deve ter opções ÚNICAS e DISTINTAS. NÃO reutilize opções de uma questão em outra.
+- As opções de cada questão devem ser diferentes das demais questões.`;
 
 export async function POST(request: NextRequest) {
   try {

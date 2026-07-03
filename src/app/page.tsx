@@ -10,6 +10,7 @@ import {
   LogOut,
   Repeat,
   Settings,
+  Sparkles,
   Star,
   User,
   X,
@@ -31,6 +32,7 @@ import {
   moduleFourLevels,
 } from '@/data/modulesConfig';
 import { useProgress, getModuleNumber } from '@/hooks/useProgress';
+import { NumberTicker } from '@/components/ui/number-ticker';
 import type { LevelData } from '@/data/moduleOneLevels';
 import type { ModuleData } from '@/components/Carousel';
 import type { PracticeQuestion } from '@/app/api/generate-practice/route';
@@ -147,6 +149,7 @@ export default function Home() {
   const [showStreakCelebration, setShowStreakCelebration] = useState(false);
   const [elapsedTime, setElapsedTime] = useState<number | null>(null);
   const [practiceQuestions, setPracticeQuestions] = useState<PracticeQuestion[] | null>(null);
+  const [sessionKodeScore, setSessionKodeScore] = useState(0);
   const [practiceLoading, setPracticeLoading] = useState(false);
   const [practiceError, setPracticeError] = useState<string | null>(null);
   const prevStreakRef = useRef<number | null>(null);
@@ -155,6 +158,7 @@ export default function Home() {
     hydrated,
     completePhase,
     completeModule,
+    addKodeScore,
     setModuleStartTime,
     resetProgress,
     adminCompleteAll,
@@ -194,6 +198,7 @@ export default function Home() {
     (moduleId: string) => {
       setActiveModuleId(moduleId);
       setPracticeQuestions(null);
+      setSessionKodeScore(0);
       setView('game');
       setModuleStartTime(Date.now());
     },
@@ -211,6 +216,7 @@ export default function Home() {
       setActiveModuleId(moduleId);
       setPracticeQuestions(null);
       setPracticeError(null);
+      setSessionKodeScore(0);
       setPracticeLoading(true);
       setView('game');
       setModuleStartTime(Date.now());
@@ -236,6 +242,11 @@ export default function Home() {
     },
     [setModuleStartTime],
   );
+
+  const handleAddKodeScore = useCallback((points: number) => {
+    addKodeScore(points);
+    setSessionKodeScore(prev => prev + points);
+  }, [addKodeScore]);
 
   const handleExitGame = useCallback(() => {
     setActiveModuleId(null);
@@ -311,11 +322,13 @@ export default function Home() {
           onModuleComplete={() => completeModule(5)}
           onModuleCompleted={handleModuleCompleted}
           onExit={handleExitGame}
+          onAddKodeScore={handleAddKodeScore}
         />
         {elapsedTime !== null && (
           <ModuleComplete
             elapsedMs={elapsedTime}
             moduleTitle="Desafios Finais"
+            kodeScore={sessionKodeScore}
             onClose={() => {
               setElapsedTime(null);
               handleExitGame();
@@ -383,12 +396,14 @@ export default function Home() {
           onComplete={handleComplete}
           onModuleComplete={completeModule}
           onModuleCompleted={handleModuleCompleted}
+          onAddKodeScore={handleAddKodeScore}
         />
         {elapsedTime !== null && (
           <ModuleComplete
             elapsedMs={elapsedTime}
             moduleTitle={moduleTitle}
             isPractice={!!practiceQuestions}
+            kodeScore={sessionKodeScore}
             onClose={() => {
               setElapsedTime(null);
               handleExitGame();
@@ -404,6 +419,10 @@ export default function Home() {
       <header className="flex items-center justify-between pt-6 pb-2">
         <Greeting userName={userName} />
         <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 rounded-full bg-zinc-900/80 px-2.5 py-1 backdrop-blur-sm sm:px-3 sm:py-1.5">
+            <Sparkles size={16} className="text-purple-400 sm:size-[18px]" />
+            <NumberTicker value={progress.kodeScore} className="text-xs font-semibold text-zinc-50 sm:text-sm tabular-nums" />
+          </div>
           <div className="flex items-center gap-1.5 rounded-full bg-zinc-900/80 px-2.5 py-1 backdrop-blur-sm sm:px-3 sm:py-1.5">
             <Flame size={16} className="text-orange-500 sm:size-[18px]" />
             <span className="text-xs font-semibold text-zinc-50 sm:text-sm">

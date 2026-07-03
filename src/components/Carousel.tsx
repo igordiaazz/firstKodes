@@ -4,8 +4,6 @@ import {
   BarChart,
   Braces,
   CheckCircle2,
-  ChevronLeft,
-  ChevronRight,
   Code,
   GitBranch,
   Repeat,
@@ -300,24 +298,7 @@ export default function Carousel({
         })}
       </div>
 
-      <div className="flex items-center justify-center gap-4 mt-12">
-        <button
-          onClick={() => goTo(activeIndex - 1)}
-          className="flex size-10 items-center justify-center rounded-full bg-zinc-900/80 border border-white/10 text-zinc-400 hover:text-zinc-50 hover:bg-zinc-800 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-          aria-label="Anterior"
-          disabled={activeIndex === 0}
-        >
-          <ChevronLeft size={20} />
-        </button>
-        <button
-          onClick={() => goTo(activeIndex + 1)}
-          className="flex size-10 items-center justify-center rounded-full bg-zinc-900/80 border border-white/10 text-zinc-400 hover:text-zinc-50 hover:bg-zinc-800 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-          aria-label="Próximo"
-          disabled={activeIndex === modules.length - 1}
-        >
-          <ChevronRight size={20} />
-        </button>
-      </div>
+      <p className="text-center text-sm text-zinc-500 mt-6">arraste os cards para ver mais</p>
 
       {showAdminPopup && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">

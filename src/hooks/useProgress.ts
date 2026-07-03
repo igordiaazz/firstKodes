@@ -6,6 +6,14 @@ import { useAuth } from '@/contexts/AuthContext';
 const STORAGE_KEY = 'firstkodes_progress';
 const MAX_LIVES = 3;
 
+export const MODULE_BASE_POINTS: Record<string, number> = {
+  fundamentos: 15,
+  decisoes: 20,
+  repeticoes: 25,
+  funcoes: 30,
+  modulo5: 35,
+};
+
 export const MODULE_NUMBERS: Record<string, number> = {
   fundamentos: 1,
   decisoes: 2,
@@ -34,6 +42,7 @@ export interface ProgressData {
   phasesCompleted: Record<string, number>;
   streak: number;
   moduleStartTime: number;
+  kodeScore: number;
 }
 
 function getDefaultProgress(): ProgressData {
@@ -43,6 +52,7 @@ function getDefaultProgress(): ProgressData {
     phasesCompleted: {},
     streak: 0,
     moduleStartTime: 0,
+    kodeScore: 0,
   };
 }
 
@@ -61,6 +71,7 @@ function readStorage(): ProgressData {
         phasesCompleted: parsed.phasesCompleted || {},
         streak: typeof parsed.streak === 'number' ? parsed.streak : 0,
         moduleStartTime: typeof parsed.moduleStartTime === 'number' ? parsed.moduleStartTime : 0,
+        kodeScore: typeof parsed.kodeScore === 'number' ? parsed.kodeScore : 0,
       };
     }
     const legacy = parsed as Record<string, number>;
@@ -70,6 +81,7 @@ function readStorage(): ProgressData {
       phasesCompleted: legacy,
       streak: 0,
       moduleStartTime: 0,
+      kodeScore: 0,
     };
   } catch {
     return getDefaultProgress();
@@ -90,6 +102,7 @@ function formatForCloud(data: ProgressData) {
     phases_completed: data.phasesCompleted,
     streak: data.streak,
     module_start_time: data.moduleStartTime,
+    kode_score: data.kodeScore,
   };
 }
 
@@ -143,6 +156,7 @@ export function useProgress() {
             phasesCompleted: cloudData.phases_completed ?? {},
             streak: cloudData.streak ?? 0,
             moduleStartTime: cloudData.module_start_time ?? 0,
+            kodeScore: cloudData.kode_score ?? 0,
           });
         }
       } catch {
@@ -201,6 +215,10 @@ export function useProgress() {
     });
   }, []);
 
+  const addKodeScore = useCallback((count: number) => {
+    setProgress((prev) => ({ ...prev, kodeScore: prev.kodeScore + count }));
+  }, []);
+
   const setCurrentModule = useCallback((_moduleId: string) => {
   }, []);
 
@@ -232,6 +250,7 @@ export function useProgress() {
     loseLife,
     completePhase,
     completeModule,
+    addKodeScore,
     setCurrentModule,
     setModuleStartTime,
     resetProgress,

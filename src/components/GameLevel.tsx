@@ -9,7 +9,7 @@ import Mascot from '@/components/Mascot';
 import TermTooltip from '@/components/TermTooltip';
 import { TERMS } from '@/data/termsDictionary';
 import { cn } from '@/lib/utils';
-import { getModuleNumber } from '@/hooks/useProgress';
+import { getModuleNumber, MODULE_BASE_POINTS } from '@/hooks/useProgress';
 import type { LevelData } from '@/data/moduleOneLevels';
 import type { PracticeQuestion } from '@/app/api/generate-practice/route';
 
@@ -52,6 +52,7 @@ interface GameLevelProps {
   onComplete: (moduleId: string, phasesCompleted: number) => void;
   onModuleComplete?: (moduleId: number) => void;
   onModuleCompleted?: () => void;
+  onAddKodeScore?: (points: number) => void;
 }
 
 export default function GameLevel({
@@ -63,6 +64,7 @@ export default function GameLevel({
   onComplete,
   onModuleComplete,
   onModuleCompleted,
+  onAddKodeScore,
 }: GameLevelProps) {
   const levels = useMemo(() => {
     if (!practiceQuestions) return propLevels;
@@ -75,7 +77,7 @@ export default function GameLevel({
         clippyText: q.context,
         codePrefix: parts[0] ?? '',
         codeSuffix: snippet.includes('[ _____ ]') ? (parts[1] ?? '') : '',
-        options: q.options,
+        options: [...q.options],
         answer: q.correctAnswer,
       };
       return data;
@@ -91,7 +93,9 @@ export default function GameLevel({
   const [mascotMessage, setMascotMessage] = useState<string | null>(null);
   const [mascotStatus, setMascotStatus] = useState<'idle' | 'typing' | 'error' | 'success'>('idle');
   const errorTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const containerRef = useRef<HTMLDivElement>(null);
   const [isMounted, setIsMounted] = useState(false);
+  const [earnedPoints, setEarnedPoints] = useState<number | null>(null);
   const isBossPhase = !practiceQuestions && currentLevelIndex >= levels.length;
   const bossChallenge = practiceQuestions ? undefined : BOSS_CHALLENGES[moduleId];
   const level = levels[currentLevelIndex];
@@ -109,7 +113,9 @@ export default function GameLevel({
     setFeedback('idle');
     setMascotMessage(null);
     setMascotStatus('idle');
+    setEarnedPoints(null);
     clearTimeout(errorTimerRef.current);
+    containerRef.current?.focus();
   }, [currentLevelIndex, isBossPhase]);
 
   const hasCalledPracticeRef = useRef(false);
@@ -140,7 +146,7 @@ export default function GameLevel({
           <div className="h-16 flex-1 animate-pulse rounded-2xl rounded-tl-sm bg-zinc-800" />
         </div>
         <div className="mb-8 h-24 animate-pulse rounded-xl bg-zinc-900" />
-        <div className="mb-auto flex flex-wrap gap-2">
+      <div className="mb-4 flex flex-wrap gap-2">
           {[1, 2, 3].map((i) => (
             <div key={i} className="h-10 w-24 animate-pulse rounded-lg bg-zinc-800" />
           ))}
@@ -159,6 +165,7 @@ export default function GameLevel({
     if (feedback === 'error') {
       setMascotMessage(null);
     }
+    containerRef.current?.focus();
   };
 
   const handleVerify = () => {
@@ -180,9 +187,13 @@ export default function GameLevel({
       return;
     }
 
+    const pts = MODULE_BASE_POINTS[moduleId] ?? 15;
     setFeedback('success');
     setMascotMessage(null);
     setMascotStatus('success');
+    setEarnedPoints(pts);
+    setTimeout(() => setEarnedPoints(null), 1000);
+    onAddKodeScore?.(pts);
     confetti({
       particleCount: 80,
       spread: 60,
@@ -215,6 +226,8 @@ export default function GameLevel({
       <BossPhase
         moduleTitle={MODULE_TITLES[moduleId] ?? moduleId}
         question={bossChallenge.question}
+        basePoints={MODULE_BASE_POINTS[moduleId] ?? 15}
+        onAddKodeScore={onAddKodeScore}
         onComplete={() => {
           onComplete(moduleId, totalPhases);
           onModuleComplete?.(getModuleNumber(moduleId));
@@ -228,7 +241,17 @@ export default function GameLevel({
   }
 
   return (
-    <div className="relative mx-auto flex min-h-screen w-full max-w-lg flex-col overflow-x-hidden bg-black px-6">
+    <div
+      ref={containerRef}
+      className="relative mx-auto flex min-h-screen w-full max-w-lg flex-col overflow-x-hidden bg-black px-6 outline-none"
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' && selectedWord && feedback !== 'success' && moduleLives > 0) {
+          e.preventDefault();
+          handleVerify();
+        }
+      }}
+      tabIndex={-1}
+    >
       <header className="flex items-center gap-2 pt-6 pb-4 md:gap-4">
         <div className="flex-1">
           <div className="mb-1.5 flex items-center justify-between text-xs text-zinc-500">
@@ -378,7 +401,7 @@ export default function GameLevel({
       <div className="mb-auto flex flex-wrap gap-2">
         {level.options.map((word, idx) => (
           <motion.button
-            key={word}
+            key={`${level.id}-${idx}`}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 + idx * 0.08 }}
@@ -395,6 +418,21 @@ export default function GameLevel({
           </motion.button>
         ))}
       </div>
+
+      <AnimatePresence>
+        {earnedPoints !== null && (
+          <motion.div
+            key="earned"
+            initial={{ opacity: 0, y: 10, scale: 0.8 }}
+            animate={{ opacity: 1, y: -10, scale: 1 }}
+            exit={{ opacity: 0, y: -30, scale: 0.8 }}
+            transition={{ duration: 0.25 }}
+            className="mb-2 text-center text-sm font-bold text-emerald-400"
+          >
+            +{earnedPoints}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <AnimatePresence>
         {feedback !== 'idle' && (

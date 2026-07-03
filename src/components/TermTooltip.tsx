@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface TermTooltipProps {
@@ -11,11 +11,30 @@ interface TermTooltipProps {
 export default function TermTooltip({ term, definition }: TermTooltipProps) {
   const [open, setOpen] = useState(false);
 
+  useEffect(() => {
+    if (!open) return;
+    const close = () => setOpen(false);
+    document.addEventListener('click', close);
+    return () => document.removeEventListener('click', close);
+  }, [open]);
+
   return (
     <span
-      className="relative inline-flex cursor-help border-b border-dashed border-purple-500/50 leading-normal"
+      className="relative inline-flex cursor-help border-b border-dashed border-purple-400/70 leading-normal text-zinc-400"
       onMouseEnter={() => setOpen(true)}
       onMouseLeave={() => setOpen(false)}
+      onClick={(e) => {
+        e.stopPropagation();
+        setOpen((prev) => !prev);
+      }}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          setOpen((prev) => !prev);
+        }
+      }}
     >
       {term}
       <AnimatePresence>

@@ -53,6 +53,7 @@ export async function POST(request: NextRequest) {
     phases_completed: body.phasesCompleted ?? body.phases_completed,
     streak: body.streak,
     module_start_time: body.moduleStartTime ?? body.module_start_time,
+    kode_score: body.kodeScore ?? body.kode_score ?? 0,
     updated_at: new Date().toISOString(),
   };
 

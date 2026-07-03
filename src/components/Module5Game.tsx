@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Crown, Heart, Loader2, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
+import { MODULE_BASE_POINTS } from '@/hooks/useProgress';
 import type { TypingChallenge } from '@/app/api/generate-module5/route';
 
 interface Module5GameProps {
@@ -11,6 +12,7 @@ interface Module5GameProps {
   onModuleComplete: () => void;
   onModuleCompleted: () => void;
   onExit: () => void;
+  onAddKodeScore?: (points: number) => void;
 }
 
 export default function Module5Game({
@@ -18,6 +20,7 @@ export default function Module5Game({
   onModuleComplete,
   onModuleCompleted,
   onExit,
+  onAddKodeScore,
 }: Module5GameProps) {
   const [challenges, setChallenges] = useState<TypingChallenge[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -26,6 +29,7 @@ export default function Module5Game({
   const [feedback, setFeedback] = useState<string | null>(null);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [earnedPoints, setEarnedPoints] = useState<number | null>(null);
   const [fetching, setFetching] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const hasCompletedRef = useRef(false);
@@ -80,6 +84,10 @@ export default function Module5Game({
       if (data.isCorrect) {
         setIsCorrect(true);
         setFeedback(data.feedback);
+        const pts = MODULE_BASE_POINTS.modulo5 * 2;
+        setEarnedPoints(pts);
+        setTimeout(() => setEarnedPoints(null), 1000);
+        onAddKodeScore?.(pts);
         onComplete(currentIndex + 1);
 
         if (currentIndex + 1 >= total) {
@@ -244,6 +252,17 @@ export default function Module5Game({
           className="w-full resize-none rounded-xl border border-zinc-800 bg-zinc-900/80 p-5 font-mono text-base text-zinc-100 placeholder-zinc-600 caret-purple-400 transition-colors focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/20 disabled:cursor-not-allowed disabled:opacity-50 scrollbar-thin"
         />
       </motion.div>
+
+      {earnedPoints !== null && (
+        <motion.div
+          initial={{ opacity: 0, y: 10, scale: 0.8 }}
+          animate={{ opacity: 1, y: -10, scale: 1 }}
+          transition={{ duration: 0.25 }}
+          className="mb-2 text-center text-sm font-bold text-emerald-400"
+        >
+          +{earnedPoints}
+        </motion.div>
+      )}
 
       {feedback && (
         <motion.div
