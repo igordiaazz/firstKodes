@@ -90,9 +90,10 @@ export default function LoginPage() {
   }
 
   return (
+    <>
     <main className="grid min-h-screen lg:grid-cols-2">
       {/* Left — Brand */}
-      <div className="relative overflow-hidden flex flex-col bg-[#050505] px-6 pb-10 pt-8 lg:p-12">
+      <div className="relative overflow-hidden flex flex-col bg-[#050505] px-6 pt-8 lg:p-12">
         <div className="text-base font-bold text-purple-400">
           firstKodes
         </div>
@@ -108,20 +109,6 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <div>
-          <p className="text-sm text-zinc-600 flex items-center gap-1">
-            made with luv by{' '}
-            <a
-              href="https://github.com/igordiaazz"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1 transition-colors hover:text-purple-400"
-            >
-              Igor Dias
-              <FontAwesomeIcon icon={faGithub} className="text-zinc-600" />
-            </a>
-          </p>
-        </div>
       </div>
 
       {/* Right — Form */}
@@ -159,5 +146,20 @@ export default function LoginPage() {
         </div>
       </div>
     </main>
+      <footer className="bg-[#050505] pb-6 text-center">
+        <p className="text-sm text-zinc-600 flex items-center justify-center gap-1">
+          made with luv by{' '}
+          <a
+            href="https://github.com/igordiaazz"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1 transition-colors hover:text-purple-400"
+          >
+            Igor Dias
+            <FontAwesomeIcon icon={faGithub} className="text-zinc-600" />
+          </a>
+        </p>
+      </footer>
+    </>
   );
 }
