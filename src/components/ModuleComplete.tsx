@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Clock, Bot, Sparkles } from 'lucide-react';
+import { Clock, Bot, Hexagon } from 'lucide-react';
 import { useEffect } from 'react';
 import confetti from 'canvas-confetti';
 import { NumberTicker } from '@/components/ui/number-ticker';
@@ -81,7 +81,7 @@ export default function ModuleComplete({ elapsedMs, moduleTitle, isPractice, onC
           </div>
 
           <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-zinc-900/80 p-4">
-            <Sparkles size={24} className="text-purple-400 shrink-0" />
+            <Hexagon size={24} className="text-purple-400 shrink-0" />
             <div>
               <p className="text-xs text-zinc-500">KodeScore</p>
               <p className="text-xl font-bold text-zinc-50">

@@ -165,7 +165,7 @@ export default function Module5Game({
   const isLocked = lives === 0 || isCorrect === true;
 
   return (
-    <div className="relative mx-auto flex min-h-screen w-full max-w-lg flex-col bg-black px-6">
+    <div className="relative mx-auto flex min-h-dvh w-full max-w-lg flex-col bg-black px-6">
       <header className="flex items-center gap-2 pt-6 pb-4 md:gap-4">
         <div className="flex-1">
           <div className="mb-1.5 flex items-center justify-between text-xs text-zinc-500">
@@ -221,7 +221,7 @@ export default function Module5Game({
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.25 }}
-        className="mb-6 flex-1"
+        className="mb-4"
       >
         <div className="mb-1.5 flex items-center gap-2 px-1">
           <div className="flex gap-1.5">
@@ -283,7 +283,7 @@ export default function Module5Game({
         </motion.div>
       )}
 
-      <div className="pb-8">
+      <div className="pb-4 sm:pb-8">
         <motion.button
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}

@@ -10,10 +10,10 @@ import {
   LogOut,
   Repeat,
   Settings,
-  Sparkles,
   Star,
   User,
   X,
+  Hexagon,
 } from 'lucide-react';
 import User3DCard from '@/components/User3DCard';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -420,7 +420,7 @@ export default function Home() {
         <Greeting userName={userName} />
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1.5 rounded-full bg-zinc-900/80 px-2.5 py-1 backdrop-blur-sm sm:px-3 sm:py-1.5">
-            <Sparkles size={16} className="text-purple-400 sm:size-[18px]" />
+            <Hexagon size={16} className="text-purple-400 sm:size-[18px]" />
             <NumberTicker value={progress.kodeScore} className="text-xs font-semibold text-zinc-50 sm:text-sm tabular-nums" />
           </div>
           <div className="flex items-center gap-1.5 rounded-full bg-zinc-900/80 px-2.5 py-1 backdrop-blur-sm sm:px-3 sm:py-1.5">
@@ -467,11 +467,11 @@ export default function Home() {
       </footer>
 
       {showNameModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xl">
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="relative w-full max-w-sm sm:w-80 rounded-xl border border-zinc-800 bg-zinc-900 p-6 shadow-xl"
+            className="relative mx-4 w-full max-w-sm sm:w-80 rounded-xl border border-zinc-800 bg-zinc-900 p-6 shadow-xl"
           >
             <h2 className="mb-2 text-lg font-bold text-zinc-50">Como quer ser chamado?</h2>
             <p className="mb-6 text-sm text-zinc-500">
@@ -530,11 +530,11 @@ export default function Home() {
       )}
 
       {showSettings && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xl">
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="relative w-full max-w-sm sm:w-80 rounded-xl border border-zinc-800 bg-zinc-900 p-6 shadow-xl"
+            className="relative mx-4 w-full max-w-sm sm:w-80 rounded-xl border border-zinc-800 bg-zinc-900 p-6 shadow-xl"
           >
             <button
               onClick={() => setShowSettings(false)}

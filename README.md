@@ -38,12 +38,12 @@ Cada módulo tem um valor base de pontos por fase de escolha; fases de digitaç�
 
 | Módulo | Base | 5 escolhas | 1 boss | Total |
 |--------|------|-----------|--------|-------|
-| 🔤 Fundamentos | 15 | 75 | 30 | 105 |
-| 🔀 Decisões | 20 | 100 | 40 | 140 |
-| 🔁 Repetições | 25 | 125 | 50 | 175 |
-| 📦 Funções e Listas | 30 | 150 | 60 | 210 |
-| 🏆 Desafios Finais | 35 | 175 | 70 | 350 |
-| **Total geral** | | | | **980** |
+| 🔤 Fundamentos | 2 | 10 | 4 | 14 |
+| 🔀 Decisões | 2 | 10 | 4 | 14 |
+| 🔁 Repetições | 3 | 15 | 6 | 21 |
+| 📦 Funções e Listas | 3 | 15 | 6 | 21 |
+| 🏆 Desafios Finais | 4 | 20 | 8 | 28 |
+| **Total geral** | | | | **98** |
 
 Os pontos são acumulados ao longo de toda a jornada e exibidos no cabeçalho com animação (NumberTicker).
 
@@ -53,7 +53,7 @@ Os pontos são acumulados ao longo de toda a jornada e exibidos no cabeçalho co
 
 - 🎮 **Fases Interativas** — Complete códigos selecionando palavras-chave ou descubra a saída do código
 - ❤️ **Sistema de Vidas** — 3 vidas por módulo; erre e aprenda com o feedback
-- ⭐ **Sistema de Pontos (KodeScore)** — Ganhe pontos a cada fase concluída (15 a 35 por escolha, dobro na digitação). Pontuação por módulo aumenta progressivamente
+- ⭐ **Sistema de Pontos (KodeScore)** — Ganhe pontos a cada fase concluída (2 a 4 por escolha, dobro na digitação)
 - 🔐 **Autenticação** — Login com Google ou GitHub via Supabase para salvar progresso na nuvem
 - 💾 **Progresso Persistente** — Salvo no `localStorage` (anônimo) ou no banco Supabase (logado), com streaks, desbloqueio progressivo e KodeScore
 - 🤖 **Modo Prática** — Gera 5 questões personalizadas por módulo via IA (completar código ou prever saída)
@@ -61,6 +61,8 @@ Os pontos são acumulados ao longo de toda a jornada e exibidos no cabeçalho co
 - 🦎 **Tutor IA (Clippy)** — Feedback contextual que se adapta ao número de vidas restantes
 - 🎠 **Carrossel de Módulos** — Navegação intuitiva com animações suaves
 - 🔥 **Celebração de Streak** — Comemoração ao completar o primeiro módulo do dia
+- 🎯 **Avanço Manual** — Após acertar, botão "Próxima fase" para avançar no seu ritmo
+- 💜 **Design Responsivo** — Interface adaptada para mobile e desktop com animações suaves entre fases
 
 ---
 

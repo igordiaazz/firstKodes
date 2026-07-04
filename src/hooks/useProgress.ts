@@ -7,11 +7,11 @@ const STORAGE_KEY = 'firstkodes_progress';
 const MAX_LIVES = 3;
 
 export const MODULE_BASE_POINTS: Record<string, number> = {
-  fundamentos: 15,
-  decisoes: 20,
-  repeticoes: 25,
-  funcoes: 30,
-  modulo5: 35,
+  fundamentos: 2,
+  decisoes: 2,
+  repeticoes: 3,
+  funcoes: 3,
+  modulo5: 4,
 };
 
 export const MODULE_NUMBERS: Record<string, number> = {
