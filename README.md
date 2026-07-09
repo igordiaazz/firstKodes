@@ -62,6 +62,7 @@ Os pontos são acumulados ao longo de toda a jornada e exibidos no cabeçalho co
 - 🎠 **Carrossel de Módulos** — Navegação intuitiva com animações suaves
 - 🔥 **Sistema de Streak (Ofensiva)** — Ao concluir uma fase por dia, a chama cinza se transforma em laranja (cresce e muda de cor) ao "acender" (arraste para cima). Cresce +1 por dia consecutivo e zera se um dia for pulado
 - 🌐 **Internacionalização (i18n)** — Suporte a Português e Inglês com roteamento por locale (`/[locale]`) via `next-intl`
+- ⚙️ **Configurações** — Painel com troca de idioma, reset de progresso com confirmação animada (botão cinza → vermelho) e saída da conta
 - 🎯 **Avanço Manual** — Após acertar, botão "Próxima fase" para avançar no seu ritmo
 - 💜 **Design Responsivo** — Interface adaptada para mobile e desktop com animações suaves entre fases
 

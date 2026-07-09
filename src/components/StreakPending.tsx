@@ -235,7 +235,7 @@ export default function StreakPending({ pendingStreak, onConfirm }: StreakPendin
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.5, ease: 'easeOut' }}
-            className="absolute bottom-24 text-lg font-semibold text-zinc-400 animate-pulse"
+            className="absolute bottom-24 left-0 right-0 w-full text-center text-lg font-semibold text-zinc-400 animate-pulse"
           >
             {t('instruction')}
           </motion.p>
@@ -256,7 +256,7 @@ export default function StreakPending({ pendingStreak, onConfirm }: StreakPendin
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.4 }}
-            className="flex flex-col items-center relative"
+            className="flex w-full flex-col items-center relative"
           >
             <AnimatePresence>
               {showText && (
@@ -264,9 +264,9 @@ export default function StreakPending({ pendingStreak, onConfirm }: StreakPendin
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                  className="relative z-10 mt-6 flex flex-col items-center"
+                  className="relative z-10 mt-6 flex w-full flex-col items-center px-6 text-center"
                 >
-                  <h2 className="text-center text-xl sm:text-2xl font-bold text-zinc-50">
+                  <h2 className="text-center text-xl font-bold text-zinc-50 sm:text-2xl">
                     {t('congratulations', { count: pendingStreak })}
                   </h2>
 

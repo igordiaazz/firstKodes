@@ -46,6 +46,19 @@
     background-color: theme('colors.zinc.500');
   }
 
+  /* Deixa os cards inferiores desvanecer suavemente na borda do container */
+  .carousel-fade::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 96px;
+    pointer-events: none;
+    z-index: 60;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, #000 100%);
+  }
+
   .text-balance {
     text-wrap: balance;
   }

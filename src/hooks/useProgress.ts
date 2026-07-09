@@ -275,9 +275,11 @@ export function useProgress() {
   }, []);
 
   const resetProgress = useCallback(() => {
-    setProgress(getDefaultProgress());
+    const reset = { ...getDefaultProgress(), moduleStartTime: Date.now() };
+    setProgress(reset);
     setPendingStreak(0);
-  }, []);
+    if (user) pushToCloud(reset);
+  }, [user]);
 
   const adminCompleteAll = useCallback(() => {
     setProgress((prev) => ({

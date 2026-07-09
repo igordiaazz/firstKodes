@@ -165,7 +165,7 @@ export default function Carousel({
   return (
     <div className="relative w-full mt-16 md:mt-24">
       <div
-        className="h-[460px] md:h-[520px] overflow-hidden relative select-none"
+        className="carousel-fade h-[460px] md:h-[520px] overflow-hidden relative select-none"
         onTouchStart={handleDragStart}
         onTouchEnd={handleDragEnd}
         onMouseDown={handleDragStart}

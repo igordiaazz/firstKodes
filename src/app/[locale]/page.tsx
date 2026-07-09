@@ -97,7 +97,7 @@ function Greeting({ userName }: { userName: string }) {
   }, [chars, done]);
 
   return (
-    <span className="text-base font-bold text-zinc-50">
+      <span className="block truncate text-sm font-bold text-zinc-50 sm:text-base">
       {fullText.slice(0, chars)}
       {!done && <span className="ml-0.5 animate-blink-cursor text-purple-400">|</span>}
     </span>
@@ -135,7 +135,7 @@ function LanguageToggle({ locale, compact }: { locale: string; compact?: boolean
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.15 }}
-              className="absolute right-0 top-full mt-1 w-36 rounded-lg border border-zinc-700 bg-zinc-900 py-1 shadow-xl z-50"
+              className="absolute left-0 top-full mt-1 w-36 rounded-lg border border-zinc-700 bg-zinc-900 py-1 shadow-xl z-50"
             >
               <button
                 onClick={() => switchLocale('pt')}
@@ -213,6 +213,7 @@ export default function Home() {
   const [view, setView] = useState<View>('home');
   const [activeModuleId, setActiveModuleId] = useState<string | null>(null);
   const [showSettings, setShowSettings] = useState(false);
+  const [confirmingReset, setConfirmingReset] = useState(false);
   const [showProfileCard, setShowProfileCard] = useState(false);
   const [showStreakLost, setShowStreakLost] = useState(false);
   const [lostStreakCount, setLostStreakCount] = useState(0);
@@ -544,20 +545,23 @@ export default function Home() {
 
   return (
     <main className="flex min-h-screen w-full flex-col px-5 md:px-8 lg:px-16">
-      <header className="flex items-center justify-between pt-6 pb-2">
-        <Greeting userName={userName} />
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1.5 rounded-full bg-zinc-900/80 px-2.5 py-1 backdrop-blur-sm sm:px-3 sm:py-1.5">
-            <Hexagon size={16} className="text-purple-400 sm:size-[18px]" />
-            <NumberTicker value={progress.kodeScore} className="text-xs font-semibold text-zinc-50 sm:text-sm tabular-nums" />
+      <header className="flex flex-wrap items-center justify-between gap-y-2 pt-6 pb-2">
+        <div className="min-w-0 flex-1 truncate">
+          <Greeting userName={userName} />
+        </div>
+        <div className="flex shrink-0 items-center gap-2">
+          <div className="flex flex-col gap-1 sm:flex-row sm:gap-2">
+            <div className="flex h-4 items-center gap-1 rounded-full bg-zinc-900/80 px-2 backdrop-blur-sm sm:h-auto sm:px-2.5 sm:py-1 sm:gap-1.5">
+              <Hexagon size={12} className="text-purple-400 sm:size-[18px]" />
+              <NumberTicker value={progress.kodeScore} className="text-[10px] font-semibold text-zinc-50 sm:text-sm tabular-nums" />
+            </div>
+            <div className="flex h-4 items-center gap-1 rounded-full bg-zinc-900/80 px-2 backdrop-blur-sm sm:h-auto sm:px-2.5 sm:py-1 sm:gap-1.5">
+              <Flame size={12} className="text-orange-500 sm:size-[18px]" />
+              <span className="text-[10px] font-semibold text-zinc-50 sm:text-sm">
+                {progress.streak}
+              </span>
+            </div>
           </div>
-          <div className="flex items-center gap-1.5 rounded-full bg-zinc-900/80 px-2.5 py-1 backdrop-blur-sm sm:px-3 sm:py-1.5">
-            <Flame size={16} className="text-orange-500 sm:size-[18px]" />
-            <span className="text-xs font-semibold text-zinc-50 sm:text-sm">
-              {progress.streak}
-            </span>
-          </div>
-          <LanguageToggle locale={locale} compact />
           <button
             onClick={() => setShowSettings(true)}
             className="flex size-9 items-center justify-center rounded-full bg-zinc-900/80 text-zinc-400 backdrop-blur-sm transition-colors hover:text-zinc-50 sm:size-10"
@@ -674,7 +678,10 @@ export default function Home() {
             className="relative mx-4 w-full max-w-sm sm:w-80 rounded-xl border border-zinc-800 bg-zinc-900 p-6 shadow-xl"
           >
             <button
-              onClick={() => setShowSettings(false)}
+              onClick={() => {
+                setShowSettings(false);
+                setConfirmingReset(false);
+              }}
               className="absolute top-4 right-4 text-zinc-500 hover:text-zinc-300 transition-colors"
               aria-label={ts('close')}
             >
@@ -682,34 +689,45 @@ export default function Home() {
             </button>
 
             <div className="mb-4 flex items-center gap-3">
-              <div className="flex size-10 items-center justify-center rounded-lg bg-purple-600/20">
-                <Settings size={20} className="text-purple-400" />
-              </div>
-              <h2 className="text-lg font-bold text-zinc-50">{ts('title')}</h2>
+              <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">
+                {ts('languageLabel')}
+              </p>
+              <LanguageToggle locale={locale} />
             </div>
 
             <div className="mb-4 border-t border-zinc-800" />
-            <p className="mb-4 text-sm text-zinc-400">
-              {ts('warning')}
-            </p>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setShowSettings(false)}
-                className="flex-1 rounded-lg border border-zinc-700 px-4 py-3 text-sm font-semibold text-zinc-300 transition-colors hover:bg-zinc-800"
-              >
-                {ts('cancel')}
-              </button>
-              <button
-                onClick={() => {
-                    resetProgress();
-                    setShowStreakLost(false);
-                    setShowSettings(false);
-                }}
-                className="flex-1 rounded-lg bg-red-600 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-red-500"
-              >
-                {ts('reset')}
-              </button>
-            </div>
+
+            <AnimatePresence initial={false}>
+              {confirmingReset && (
+                <motion.p
+                  key="warn"
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="mb-4 overflow-hidden text-sm text-zinc-400"
+                >
+                  {ts('warning')}
+                </motion.p>
+              )}
+            </AnimatePresence>
+            <motion.button
+              onClick={
+                confirmingReset
+                  ? () => {
+                      resetProgress();
+                      setShowStreakLost(false);
+                      setConfirmingReset(false);
+                      setShowSettings(false);
+                    }
+                  : () => setConfirmingReset(true)
+              }
+              initial={false}
+              animate={{ backgroundColor: confirmingReset ? '#dc2626' : '#27272a' }}
+              transition={{ duration: 0.35, ease: 'easeInOut' }}
+              className={`w-full rounded-lg px-4 py-3 text-sm font-semibold text-white ${confirmingReset ? 'hover:bg-red-500' : 'hover:bg-zinc-700'}`}
+            >
+              {confirmingReset ? ts('confirmReset') : ts('reset')}
+            </motion.button>
 
             {user && (
               <>
