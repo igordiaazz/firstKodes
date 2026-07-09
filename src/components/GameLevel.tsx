@@ -4,21 +4,17 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowRight, Heart, Loader2, X } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useLocale, useTranslations } from 'next-intl';
 import BossPhase from '@/components/BossPhase';
 import Mascot from '@/components/Mascot';
 import TermTooltip from '@/components/TermTooltip';
 import { TERMS } from '@/data/termsDictionary';
+import { TERMS_EN } from '@/data/termsDictionary.en';
+import { BOSS_CHALLENGES_EN } from '@/components/GameLevelEn';
 import { cn } from '@/lib/utils';
 import { getModuleNumber, MODULE_BASE_POINTS } from '@/hooks/useProgress';
 import type { LevelData } from '@/data/moduleOneLevels';
 import type { PracticeQuestion } from '@/app/api/generate-practice/route';
-
-const MODULE_TITLES: Record<string, string> = {
-  fundamentos: 'Fundamentos',
-  decisoes: 'Decisões',
-  repeticoes: 'Repetições',
-  funcoes: 'Funções e Listas',
-};
 
 export const BOSS_CHALLENGES: Record<string, { question: string; answer: string }> = {
   fundamentos: {
@@ -66,6 +62,20 @@ export default function GameLevel({
   onModuleCompleted,
   onAddKodeScore,
 }: GameLevelProps) {
+  const locale = useLocale();
+  const t = useTranslations('game');
+  const tm = useTranslations('modules');
+  const isEn = locale === 'en';
+  const terms = isEn ? TERMS_EN : TERMS;
+  const bossChallenges = isEn ? BOSS_CHALLENGES_EN : BOSS_CHALLENGES;
+
+  const MODULE_TITLES: Record<string, string> = {
+    fundamentos: tm('fundamentos.title'),
+    decisoes: tm('decisoes.title'),
+    repeticoes: tm('repeticoes.title'),
+    funcoes: tm('funcoes.title'),
+  };
+
   const levels = useMemo(() => {
     if (!practiceQuestions) return propLevels;
     return practiceQuestions.map((q, i) => {
@@ -97,7 +107,7 @@ export default function GameLevel({
   const [isMounted, setIsMounted] = useState(false);
   const [earnedPoints, setEarnedPoints] = useState<number | null>(null);
   const isBossPhase = !practiceQuestions && currentLevelIndex >= levels.length;
-  const bossChallenge = practiceQuestions ? undefined : BOSS_CHALLENGES[moduleId];
+  const bossChallenge = practiceQuestions ? undefined : bossChallenges[moduleId];
   const level = levels[currentLevelIndex];
   const totalPhases = levels.length + (bossChallenge ? 1 : 0);
   const displayPhase = currentLevelIndex + 1;
@@ -176,9 +186,9 @@ export default function GameLevel({
       setMascotStatus('error');
       clearTimeout(errorTimerRef.current);
       if (nextLives <= 0) {
-        setMascotMessage('Ah não, suas vidas acabaram!');
+        setMascotMessage(t('noLivesMascot'));
       } else {
-        setMascotMessage('Oops!');
+        setMascotMessage(t('oopsMascot'));
         errorTimerRef.current = setTimeout(() => {
           setMascotStatus('idle');
         }, 1500);
@@ -232,6 +242,7 @@ export default function GameLevel({
         question={bossChallenge.question}
         basePoints={MODULE_BASE_POINTS[moduleId] ?? 15}
         onAddKodeScore={onAddKodeScore}
+        locale={locale}
         onComplete={() => {
           onComplete(moduleId, totalPhases);
           onModuleComplete?.(getModuleNumber(moduleId));
@@ -265,7 +276,7 @@ export default function GameLevel({
         <div className="flex-1">
           <div className="mb-1.5 flex items-center justify-between text-xs text-zinc-500">
             <span>
-              Fase {displayPhase} de {totalPhases}
+              {t('phaseLabel', { current: displayPhase, total: totalPhases })}
             </span>
             <div className="flex items-center gap-1">
               <AnimatePresence mode="wait">
@@ -306,7 +317,7 @@ export default function GameLevel({
         <button
           onClick={handleExit}
           className="flex size-9 items-center justify-center rounded-full bg-zinc-800 text-zinc-400 transition-colors hover:bg-zinc-700 hover:text-zinc-50"
-          aria-label="Sair"
+          aria-label={t('exit')}
         >
           <X size={18} />
         </button>
@@ -340,7 +351,7 @@ export default function GameLevel({
                     <TermTooltip
                       key={i}
                       term={term}
-                      definition={TERMS[term] ?? term}
+                      definition={terms[term] ?? term}
                     />
                   );
                 }
@@ -388,7 +399,7 @@ export default function GameLevel({
 
           {level.type === 'output' && (
             <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-zinc-500">
-              Saída:
+              {t('outputLabel')}
             </div>
           )}
 
@@ -429,11 +440,11 @@ export default function GameLevel({
                   )}
                 >
                   {feedback === 'success' ? (
-                    <span>Correto! <span className="font-bold text-emerald-300">+{earnedPoints}</span></span>
+                    <span>{t('correct')} <span className="font-bold text-emerald-300">+{earnedPoints}</span></span>
                   ) : moduleLives > 0 ? (
-                    'Oops! Tente novamente.'
+                    t('wrong')
                   ) : (
-                    'Sem vidas!'
+                    t('noLives')
                   )}
                 </motion.div>
               )}
@@ -458,11 +469,11 @@ export default function GameLevel({
                 >
                   {feedback === 'success' ? (
                     <span className="flex items-center justify-center gap-2">
-                      Próxima fase
+                      {t('nextPhase')}
                       <ArrowRight size={18} />
                     </span>
                   ) : (
-                    'Verificar'
+                    t('verify')
                   )}
                 </motion.button>
               </div>
@@ -474,7 +485,7 @@ export default function GameLevel({
                   onClick={handleExit}
                   className="w-full rounded-xl bg-purple-600 py-3.5 text-base font-bold text-white shadow-lg shadow-purple-600/25 hover:bg-purple-500 active:scale-[0.98]"
                 >
-                  Voltar ao menu principal
+                  {t('backToMenu')}
                 </motion.button>
               </div>
             )}

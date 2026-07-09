@@ -1,0 +1,213 @@
+{
+  "home": {
+    "title": "firstKodes",
+    "description": "Plataforma gamificada de ensino de programação para quem está começando.",
+    "fallbackName": "viajante",
+    "greetings": ["Olá", "E aí", "Que bom te ver"],
+    "loading": "Carregando..."
+  },
+  "settings": {
+    "title": "Configurações",
+    "close": "Fechar",
+    "warning": "Esta ação irá apagar todo o seu progresso, incluindo fases concluídas e streak.",
+    "cancel": "Cancelar",
+    "reset": "Resetar",
+    "signOut": "Sair",
+    "languageLabel": "Idioma",
+    "portuguese": "Português",
+    "english": "Inglês"
+  },
+  "profile": {
+    "title": "Perfil",
+    "close": "Fechar",
+    "defaultSubtitle": "Aprendendo a programar em Python",
+    "providerGithub": "Autenticado via GitHub",
+    "providerGoogle": "Autenticado via Google",
+    "clickOutside": "clique fora do card para voltar",
+    "clickOutsideEn": "click outside the card to go back"
+  },
+  "practice": {
+    "generating": "Gerando prática...",
+    "creatingPhases": "Criando 5 fases personalizadas para {moduleName}",
+    "error": "Erro",
+    "errorDefault": "Erro ao gerar prática.",
+    "errorConnection": "Erro de conexão ao gerar prática.",
+    "back": "Voltar"
+  },
+  "nameModal": {
+    "title": "Como quer ser chamado?",
+    "subtitle": "Escolha um nome para aparecer nas saudações",
+    "placeholder": "Seu nome",
+    "skip": "Pular",
+    "save": "Salvar"
+  },
+  "modules": {
+    "fundamentos": {
+      "title": "Fundamentos",
+      "description": "Variáveis, tipos de dados e operadores básicos"
+    },
+    "decisoes": {
+      "title": "Decisões",
+      "description": "Estruturas condicionais (if/else, switch)"
+    },
+    "repeticoes": {
+      "title": "Repetições",
+      "description": "Loops (for, while, do-while)"
+    },
+    "funcoes": {
+      "title": "Funções e Listas",
+      "description": "Funções, arrays e listas encadeadas"
+    },
+    "modulo5": {
+      "title": "Desafios Finais",
+      "description": "Desafios de digitação com Python do zero"
+    }
+  },
+  "carousel": {
+    "moduleLabel": "Módulo {number}",
+    "tagPython": "Python",
+    "tagLogic": "Lógica",
+    "tagBeginner": "Iniciante",
+    "phasesProgress": "{completed}/{total} fases",
+    "locked": "Bloqueado",
+    "practice": "Praticar",
+    "start": "Iniciar",
+    "dragHint": "arraste os cards para ver mais",
+    "adminTitle": "Acesso Administrativo",
+    "adminPlaceholder": "Digite a senha",
+    "cancel": "Cancelar",
+    "confirm": "Confirmar"
+  },
+  "game": {
+    "phaseLabel": "Fase {current} de {total}",
+    "exit": "Sair",
+    "outputLabel": "Saída:",
+    "correct": "Correto!",
+    "wrong": "Oops! Tente novamente.",
+    "noLives": "Sem vidas!",
+    "noLivesMascot": "Ah não, suas vidas acabaram!",
+    "oopsMascot": "Oops!",
+    "nextPhase": "Próxima fase",
+    "verify": "Verificar",
+    "backToMenu": "Voltar ao menu principal"
+  },
+  "boss": {
+    "title": "Desafio do Chefe",
+    "tabLabel": "desafio.py",
+    "placeholder": "Digite seu código aqui...",
+    "analyzing": "Analisando...",
+    "testCode": "Testar Código",
+    "connectionError": "Erro de conexão com o tutor.",
+    "exit": "Sair",
+    "challenges": {
+      "fundamentos": {
+        "question": "Sua missão final: Escreva um comando em Python que exiba a frase \"Eu venci!\" na tela.",
+        "answer": "print(\"Eu venci!\")"
+      },
+      "decisoes": {
+        "question": "Sua missão final: Escreva uma estrutura condicional que verifique se a variável \"temperatura\" é maior que 30.",
+        "answer": "if temperatura > 30:"
+      },
+      "repeticoes": {
+        "question": "Sua missão final: Escreva um loop while que repita enquanto \"contador\" for menor que 5.",
+        "answer": "while contador < 5:"
+      },
+      "funcoes": {
+        "question": "Sua missão final: Escreva a definição de uma função chamada \"dobro\" que recebe um parâmetro \"x\".",
+        "answer": "def dobro(x):"
+      }
+    }
+  },
+  "module5": {
+    "generating": "Gerando desafios...",
+    "creatingPhases": "Criando 5 fases de digitação personalizadas",
+    "error": "Erro",
+    "errorDefault": "Erro ao gerar desafios.",
+    "errorConnection": "Erro de conexão ao gerar desafios.",
+    "back": "Voltar",
+    "phaseLabel": "Fase {current} de {total}",
+    "challengeLabel": "Desafio {number}",
+    "tabLabel": "desafio.py",
+    "placeholder": "Digite seu código aqui...",
+    "analyzing": "Analisando...",
+    "testCode": "Testar Código",
+    "connectionError": "Erro de conexão com o tutor.",
+    "exit": "Sair"
+  },
+  "moduleComplete": {
+    "practiceComplete": "Prática Concluída!",
+    "moduleComplete": "Módulo Concluído!",
+    "extraPhases": "Fases extras",
+    "time": "Tempo",
+    "kodeScore": "KodeScore",
+    "continue": "Continuar"
+  },
+  "streak": {
+    "title": "Parabéns, seu primeiro dia de muitos na programação!",
+    "continue": "Continuar"
+  },
+  "streakPending": {
+    "sparkTitle": "Um novo dia!",
+    "instruction": "Deslize para cima para acender e ativar sua ofensiva!",
+    "almostThere": "Quase lá! Continue!",
+    "success": "🔥 Streak de {count, plural, one {{count} dia!} other {{count} dias!}}",
+    "congratulations": "{count} dias de ofensiva!",
+    "tryAgain": "Tente novamente!",
+    "continue": "Continuar"
+  },
+  "streakLost": {
+    "title": "Sua streak apagou!",
+    "subtitle": "Você tinha uma streak de {count} dias. Todo dia é uma nova chance!",
+    "continue": "Começar nova streak"
+  },
+  "footer": {
+    "text": "made with luv by",
+    "author": "Igor Dias"
+  },
+  "login": {
+    "typewriterWords": ["aprende.", "constrói.", "evolui."],
+    "unconfiguredTitle": "firstKodes",
+    "unconfiguredDesc": "Supabase não está configurado. Adicione as variáveis de ambiente no",
+    "continueWithoutAccount": "Continuar sem conta",
+    "hero": "firstKodes é onde você",
+    "description": "Uma plataforma eficaz para seus primeiros passos na programação.",
+    "brand": "firstKodes",
+    "formTitle": "Comece sua jornada",
+    "formSubtitle": "Entre com Google ou GitHub para salvar seu progresso",
+    "google": "Google",
+    "github": "GitHub",
+    "footer": "made with luv by",
+    "author": "Igor Dias"
+  },
+  "api": {
+    "checkCode": {
+      "noApiKey": "Erro interno: chave da API não configurada.",
+      "invalidRequest": "Requisição inválida. Envie challenge, code e lives.",
+      "contactError": "Erro ao contactar o tutor. ({status})",
+      "invalidResponse": "Resposta inválida do tutor.",
+      "unexpectedFormat": "Formato inesperado da resposta do tutor.",
+      "internalError": "Erro interno do servidor. Tente novamente."
+    },
+    "generatePractice": {
+      "noApiKey": "Erro interno: chave da API não configurada.",
+      "invalidRequest": "Requisição inválida. Envie moduleName.",
+      "contactError": "Erro ao contactar o gerador de exercícios. ({status})",
+      "invalidResponse": "Resposta inválida do gerador de exercícios.",
+      "unexpectedFormat": "Formato inesperado da resposta do gerador de exercícios.",
+      "noValidQuestions": "Nenhuma questão válida foi gerada. Tente novamente.",
+      "internalError": "Erro interno do servidor. Tente novamente."
+    },
+    "generateModule5": {
+      "noApiKey": "Erro interno: chave da API não configurada.",
+      "contactError": "Erro ao contactar o gerador de desafios. ({status})",
+      "invalidResponse": "Resposta inválida do gerador de desafios.",
+      "unexpectedFormat": "Formato inesperado da resposta.",
+      "noValidChallenges": "Nenhum desafio válido foi gerado. Tente novamente.",
+      "internalError": "Erro interno do servidor. Tente novamente."
+    },
+    "progress": {
+      "notConfigured": "Supabase não configurado",
+      "notAuthenticated": "Não autenticado"
+    }
+  }
+}

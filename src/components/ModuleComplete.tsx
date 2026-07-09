@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import { Clock, Bot, Hexagon } from 'lucide-react';
 import { useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import confetti from 'canvas-confetti';
 import { NumberTicker } from '@/components/ui/number-ticker';
 
@@ -25,6 +26,7 @@ function formatTime(ms: number): string {
 }
 
 export default function ModuleComplete({ elapsedMs, moduleTitle, isPractice, onClose, kodeScore }: ModuleCompleteProps) {
+  const t = useTranslations('moduleComplete');
   const timeStr = formatTime(elapsedMs);
 
   useEffect(() => {
@@ -64,18 +66,18 @@ export default function ModuleComplete({ elapsedMs, moduleTitle, isPractice, onC
         </motion.div>
 
         <h2 className="mt-6 text-center text-2xl font-bold text-zinc-50 drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]">
-          {isPractice ? 'Prática Concluída!' : 'Módulo Concluído!'}
+          {isPractice ? t('practiceComplete') : t('moduleComplete')}
         </h2>
         <p className="mt-2 text-zinc-400">{moduleTitle}</p>
         {isPractice && (
-          <p className="mt-1 text-sm text-zinc-500">Fases extras</p>
+          <p className="mt-1 text-sm text-zinc-500">{t('extraPhases')}</p>
         )}
 
         <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
           <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-zinc-900/80 p-4">
             <Clock size={24} className="text-purple-400 shrink-0" />
             <div>
-              <p className="text-xs text-zinc-500">Tempo</p>
+              <p className="text-xs text-zinc-500">{t('time')}</p>
               <p className="text-xl font-bold text-zinc-50">{timeStr}</p>
             </div>
           </div>
@@ -83,7 +85,7 @@ export default function ModuleComplete({ elapsedMs, moduleTitle, isPractice, onC
           <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-zinc-900/80 p-4">
             <Hexagon size={24} className="text-purple-400 shrink-0" />
             <div>
-              <p className="text-xs text-zinc-500">KodeScore</p>
+              <p className="text-xs text-zinc-500">{t('kodeScore')}</p>
               <p className="text-xl font-bold text-zinc-50">
                 <NumberTicker value={kodeScore} />
               </p>
@@ -98,7 +100,7 @@ export default function ModuleComplete({ elapsedMs, moduleTitle, isPractice, onC
           onClick={onClose}
           className="mt-8 rounded-xl bg-purple-600 px-8 py-3 text-base font-bold text-white shadow-lg shadow-purple-600/25 transition-all hover:bg-purple-500 hover:shadow-[0_0_25px_rgba(168,85,247,0.5)] active:scale-[0.98]"
         >
-          Continuar
+          {t('continue')}
         </motion.button>
       </motion.div>
     </motion.div>

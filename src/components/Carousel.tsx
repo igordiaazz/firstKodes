@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useTranslations } from 'next-intl';
 
 export interface ModuleData {
   id: string;
@@ -76,6 +77,7 @@ export default function Carousel({
   onPracticeModule,
   onAdminUnlock,
 }: CarouselProps) {
+  const t = useTranslations('carousel');
   const modules = externalModules ?? MOCK_MODULES;
   const [activeIndex, setActiveIndex] = useState(0);
   const [clickCount, setClickCount] = useState(0);
@@ -215,7 +217,7 @@ export default function Carousel({
                       className="text-sm text-white/60 font-medium"
                       onClick={(e) => handleIconClick(e, idx)}
                     >
-                      Módulo {idx + 1}
+                      {t('moduleLabel', { number: idx + 1 })}
                     </p>
                     <div className="flex items-center gap-2 mt-1">
                       <h3 className="text-2xl font-bold text-white tracking-tight leading-tight md:text-3xl">
@@ -247,24 +249,24 @@ export default function Carousel({
 
                   <div className="flex items-center gap-4 mb-4 text-xs text-neutral-400 font-medium">
                     <span className="px-2 py-1 text-[10px] font-semibold uppercase tracking-widest text-purple-300 bg-purple-500/10 border border-purple-500/30 rounded-md">
-                      Python
+                      {t('tagPython')}
                     </span>
                     <span className="px-2 py-1 text-[10px] font-semibold uppercase tracking-widest text-neutral-300 bg-white/5 border border-white/10 rounded-md">
-                      Lógica
+                      {t('tagLogic')}
                     </span>
                     <span className="flex items-center gap-1.5">
                       <BarChart size={14} className="text-neutral-500" />
-                      Iniciante
+                      {t('tagBeginner')}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-white/60 font-medium">
-                      {mod.phasesCompleted}/{mod.totalPhases} fases
+                      {t('phasesProgress', { completed: mod.phasesCompleted, total: mod.totalPhases })}
                     </span>
 
                     {isLocked ? (
                       <span className="rounded-full bg-white/10 px-5 py-2 text-sm font-semibold text-white/50 backdrop-blur-sm border border-white/5">
-                        Bloqueado
+                        {t('locked')}
                       </span>
                     ) : (
                       <button
@@ -284,8 +286,8 @@ export default function Carousel({
                         )}
                       >
                         {mod.phasesCompleted === mod.totalPhases
-                          ? 'Praticar'
-                          : 'Iniciar'}
+                          ? t('practice')
+                          : t('start')}
                       </button>
                     )}
                   </div>
@@ -303,18 +305,18 @@ export default function Carousel({
         })}
       </div>
 
-      <p className="text-center text-sm text-zinc-500 mt-6">arraste os cards para ver mais</p>
+      <p className="text-center text-sm text-zinc-500 mt-6">{t('dragHint')}</p>
 
       {showAdminPopup && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
           <div className="w-full max-w-sm sm:w-80 rounded-xl border border-zinc-800 bg-zinc-900 p-6 shadow-xl">
-            <h2 className="mb-4 text-lg font-bold text-zinc-50">Acesso Administrativo</h2>
+            <h2 className="mb-4 text-lg font-bold text-zinc-50">{t('adminTitle')}</h2>
             <input
               type="password"
               value={adminPassword}
               onChange={(e) => setAdminPassword(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleAdminSubmit()}
-              placeholder="Digite a senha"
+              placeholder={t('adminPlaceholder')}
               className="mb-4 w-full rounded-lg border border-zinc-700 bg-zinc-800 px-4 py-3 text-sm text-zinc-100 placeholder-zinc-500 focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/20 focus:outline-none"
               autoFocus
             />
@@ -323,13 +325,13 @@ export default function Carousel({
                 onClick={() => { setShowAdminPopup(false); setAdminPassword(''); }}
                 className="flex-1 rounded-lg border border-zinc-700 px-4 py-3 text-sm font-semibold text-zinc-300 transition-colors hover:bg-zinc-800"
               >
-                Cancelar
+                {t('cancel')}
               </button>
               <button
                 onClick={handleAdminSubmit}
                 className="flex-1 rounded-lg bg-purple-600 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-purple-500"
               >
-                Confirmar
+                {t('confirm')}
               </button>
             </div>
           </div>

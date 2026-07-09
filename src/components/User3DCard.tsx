@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { useRef, useState, type ElementType } from 'react';
+import { useTranslations } from 'next-intl';
 import { Github } from 'lucide-react';
 import { GlareCard } from '@/components/ui/glare-card';
 
@@ -36,16 +37,19 @@ function GoogleIcon({ size }: { size: number }) {
   );
 }
 
-const PROVIDER_INFO: Record<string, { label: string; icon: ElementType }> = {
-  github: { label: 'Autenticado via GitHub', icon: Github },
-  google: { label: 'Autenticado via Google', icon: GoogleIcon },
-};
+function useProviderInfo(): Record<string, { label: string; icon: ElementType }> {
+  const t = useTranslations('profile');
+  return {
+    github: { label: t('providerGithub'), icon: Github },
+    google: { label: t('providerGoogle'), icon: GoogleIcon },
+  };
+}
 
-function ProviderIcon({ provider }: { provider: string }) {
+function ProviderIcon({ provider, info }: { provider: string; info: Record<string, { label: string; icon: ElementType }> }) {
+  const providerInfo = info[provider];
+  if (!providerInfo) return null;
+  const Icon = providerInfo.icon;
   if (provider === 'google') return <GoogleIcon size={12} />;
-  const info = PROVIDER_INFO[provider];
-  if (!info) return null;
-  const Icon = info.icon;
   return <Icon size={12} />;
 }
 
@@ -56,6 +60,8 @@ export default function User3DCard({
   provider,
   onClose,
 }: User3DCardProps) {
+  const t = useTranslations('profile');
+  const PROVIDER_INFO = useProviderInfo();
   const [autoRotating, setAutoRotating] = useState(false);
   const lastTapRef = useRef(0);
 
@@ -99,12 +105,12 @@ export default function User3DCard({
               <div>
                 <h2 className="text-2xl font-bold text-white">{fullName || displayName}</h2>
                 <p className="text-base text-slate-300 mt-1">
-                  {email || 'Aprendendo a programar em C'}
+                  {email || t('defaultSubtitle')}
                 </p>
 
                 {provider && (
                   <div className="flex items-center gap-1.5 rounded-md border border-white/10 bg-white/5 px-2.5 py-1.5 mt-4 w-fit">
-                    <ProviderIcon provider={provider} />
+                    <ProviderIcon provider={provider} info={PROVIDER_INFO} />
                     <span className="text-[11px] font-medium text-slate-300">
                       {PROVIDER_INFO[provider]?.label ?? provider}
                     </span>
@@ -115,7 +121,7 @@ export default function User3DCard({
           </GlareCard>
         </motion.div>
         <p className="mt-4 text-center text-[13px] text-zinc-500">
-          clique fora do card para voltar
+          {t('clickOutside')}
         </p>
       </div>
     </motion.div>

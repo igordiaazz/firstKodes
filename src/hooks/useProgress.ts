@@ -41,8 +41,19 @@ export interface ProgressData {
   unlockedModules: number[];
   phasesCompleted: Record<string, number>;
   streak: number;
+  lastActivityDate: string;
   moduleStartTime: number;
   kodeScore: number;
+}
+
+function getToday(): string {
+  return new Date().toISOString().split('T')[0];
+}
+
+function getYesterday(today: string): string {
+  const d = new Date(today + 'T00:00:00');
+  d.setDate(d.getDate() - 1);
+  return d.toISOString().split('T')[0];
 }
 
 function getDefaultProgress(): ProgressData {
@@ -51,6 +62,7 @@ function getDefaultProgress(): ProgressData {
     unlockedModules: [1],
     phasesCompleted: {},
     streak: 0,
+    lastActivityDate: '',
     moduleStartTime: 0,
     kodeScore: 0,
   };
@@ -70,6 +82,7 @@ function readStorage(): ProgressData {
           : [1],
         phasesCompleted: parsed.phasesCompleted || {},
         streak: typeof parsed.streak === 'number' ? parsed.streak : 0,
+        lastActivityDate: typeof parsed.lastActivityDate === 'string' ? parsed.lastActivityDate : '',
         moduleStartTime: typeof parsed.moduleStartTime === 'number' ? parsed.moduleStartTime : 0,
         kodeScore: typeof parsed.kodeScore === 'number' ? parsed.kodeScore : 0,
       };
@@ -80,6 +93,7 @@ function readStorage(): ProgressData {
       unlockedModules: [1],
       phasesCompleted: legacy,
       streak: 0,
+      lastActivityDate: '',
       moduleStartTime: 0,
       kodeScore: 0,
     };
@@ -101,6 +115,7 @@ function formatForCloud(data: ProgressData) {
     unlockedModules: data.unlockedModules,
     phases_completed: data.phasesCompleted,
     streak: data.streak,
+    last_activity_date: data.lastActivityDate || null,
     module_start_time: data.moduleStartTime,
     kode_score: data.kodeScore,
   };
@@ -121,6 +136,7 @@ export function useProgress() {
   const { user } = useAuth();
   const [progress, setProgress] = useState<ProgressData>(getDefaultProgress);
   const [hydrated, setHydrated] = useState(false);
+  const [pendingStreak, setPendingStreak] = useState(0);
   const cloudSyncTimer = useRef<ReturnType<typeof setTimeout>>();
   const progressRef = useRef(progress);
   const initialSyncDone = useRef(false);
@@ -155,6 +171,7 @@ export function useProgress() {
             unlockedModules: cloudData.unlocked_modules ?? [1],
             phasesCompleted: cloudData.phases_completed ?? {},
             streak: cloudData.streak ?? 0,
+            lastActivityDate: cloudData.last_activity_date ?? '',
             moduleStartTime: cloudData.module_start_time ?? 0,
             kodeScore: cloudData.kode_score ?? 0,
           });
@@ -188,31 +205,62 @@ export function useProgress() {
   }, []);
 
   const completePhase = useCallback((moduleId: string, count: number) => {
-    setProgress((prev) => ({
-      ...prev,
+    const today = getToday();
+    const prev = progressRef.current;
+    setProgress((p) => ({
+      ...p,
       phasesCompleted: {
-        ...prev.phasesCompleted,
-        [moduleId]: Math.max(count, prev.phasesCompleted[moduleId] ?? 0),
+        ...p.phasesCompleted,
+        [moduleId]: Math.max(count, p.phasesCompleted[moduleId] ?? 0),
       },
     }));
+    if (prev.lastActivityDate === today) return;
+    const newStreak =
+      !prev.lastActivityDate || prev.lastActivityDate !== getYesterday(today)
+        ? 1
+        : prev.streak + 1;
+    setPendingStreak(newStreak);
   }, []);
 
   const completeModule = useCallback((moduleId: number) => {
     setProgress((prev) => {
       const nextId = moduleId + 1;
-      const wasFirst = prev.streak === 0;
-
-      if (prev.unlockedModules.includes(nextId)) {
-        if (wasFirst) return { ...prev, streak: 1 };
-        return prev;
-      }
-
-      return {
-        ...prev,
-        unlockedModules: [...prev.unlockedModules, nextId],
-        streak: wasFirst ? 1 : prev.streak,
-      };
+      if (prev.unlockedModules.includes(nextId)) return prev;
+      return { ...prev, unlockedModules: [...prev.unlockedModules, nextId] };
     });
+  }, []);
+
+  const confirmStreak = useCallback(() => {
+    const newStreak = pendingStreak;
+    if (newStreak <= 0) return;
+    setPendingStreak(0);
+    const today = getToday();
+    setProgress((prev) => ({
+      ...prev,
+      streak: newStreak,
+      lastActivityDate: today,
+    }));
+  }, [pendingStreak]);
+
+  const cancelPendingStreak = useCallback(() => {
+    setPendingStreak(0);
+  }, []);
+
+  const checkStreakLost = useCallback((): { lost: boolean; count: number } => {
+    const today = getToday();
+    const current = progressRef.current;
+    if (current.streak <= 0 || !current.lastActivityDate) {
+      return { lost: false, count: 0 };
+    }
+    const lastDate = new Date(current.lastActivityDate + 'T00:00:00');
+    const todayDate = new Date(today + 'T00:00:00');
+    const diffMs = todayDate.getTime() - lastDate.getTime();
+    const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
+    if (diffDays > 1) {
+      setProgress((prev) => ({ ...prev, streak: 0 }));
+      return { lost: true, count: current.streak };
+    }
+    return { lost: false, count: 0 };
   }, []);
 
   const addKodeScore = useCallback((count: number) => {
@@ -228,6 +276,7 @@ export function useProgress() {
 
   const resetProgress = useCallback(() => {
     setProgress(getDefaultProgress());
+    setPendingStreak(0);
   }, []);
 
   const adminCompleteAll = useCallback(() => {
@@ -247,9 +296,13 @@ export function useProgress() {
   return {
     progress,
     hydrated,
+    pendingStreak,
     loseLife,
     completePhase,
     completeModule,
+    confirmStreak,
+    cancelPendingStreak,
+    checkStreakLost,
     addKodeScore,
     setCurrentModule,
     setModuleStartTime,

@@ -1,0 +1,212 @@
+{
+  "home": {
+    "title": "firstKodes",
+    "description": "A gamified programming learning platform for beginners.",
+    "fallbackName": "traveler",
+    "greetings": ["Hello", "Hey there", "Great to see you"],
+    "loading": "Loading..."
+  },
+  "settings": {
+    "title": "Settings",
+    "close": "Close",
+    "warning": "This action will erase all your progress, including completed phases and streak.",
+    "cancel": "Cancel",
+    "reset": "Reset",
+    "signOut": "Sign out",
+    "languageLabel": "Language",
+    "portuguese": "Português",
+    "english": "English"
+  },
+  "profile": {
+    "title": "Profile",
+    "close": "Close",
+    "defaultSubtitle": "Learning to code in Python",
+    "providerGithub": "Authenticated via GitHub",
+    "providerGoogle": "Authenticated via Google",
+    "clickOutside": "click outside the card to go back"
+  },
+  "practice": {
+    "generating": "Generating practice...",
+    "creatingPhases": "Creating 5 custom phases for {moduleName}",
+    "error": "Error",
+    "errorDefault": "Error generating practice.",
+    "errorConnection": "Connection error while generating practice.",
+    "back": "Back"
+  },
+  "nameModal": {
+    "title": "What should we call you?",
+    "subtitle": "Choose a name to appear in greetings",
+    "placeholder": "Your name",
+    "skip": "Skip",
+    "save": "Save"
+  },
+  "modules": {
+    "fundamentos": {
+      "title": "Fundamentals",
+      "description": "Variables, data types, and basic operators"
+    },
+    "decisoes": {
+      "title": "Decisions",
+      "description": "Conditional structures (if/else, switch)"
+    },
+    "repeticoes": {
+      "title": "Loops",
+      "description": "Loops (for, while, do-while)"
+    },
+    "funcoes": {
+      "title": "Functions & Lists",
+      "description": "Functions, arrays, and linked lists"
+    },
+    "modulo5": {
+      "title": "Final Challenges",
+      "description": "Typing challenges with Python from scratch"
+    }
+  },
+  "carousel": {
+    "moduleLabel": "Module {number}",
+    "tagPython": "Python",
+    "tagLogic": "Logic",
+    "tagBeginner": "Beginner",
+    "phasesProgress": "{completed}/{total} phases",
+    "locked": "Locked",
+    "practice": "Practice",
+    "start": "Start",
+    "dragHint": "drag the cards to see more",
+    "adminTitle": "Admin Access",
+    "adminPlaceholder": "Enter the password",
+    "cancel": "Cancel",
+    "confirm": "Confirm"
+  },
+  "game": {
+    "phaseLabel": "Phase {current} of {total}",
+    "exit": "Exit",
+    "outputLabel": "Output:",
+    "correct": "Correct!",
+    "wrong": "Oops! Try again.",
+    "noLives": "No lives!",
+    "noLivesMascot": "Oh no, you're out of lives!",
+    "oopsMascot": "Oops!",
+    "nextPhase": "Next phase",
+    "verify": "Check",
+    "backToMenu": "Back to main menu"
+  },
+  "boss": {
+    "title": "Boss Challenge",
+    "tabLabel": "challenge.py",
+    "placeholder": "Type your code here...",
+    "analyzing": "Analyzing...",
+    "testCode": "Test Code",
+    "connectionError": "Connection error with the tutor.",
+    "exit": "Exit",
+    "challenges": {
+      "fundamentos": {
+        "question": "Your final mission: Write a Python command that displays the phrase \"I won!\" on the screen.",
+        "answer": "print(\"I won!\")"
+      },
+      "decisoes": {
+        "question": "Your final mission: Write a conditional structure that checks if the variable \"temperature\" is greater than 30.",
+        "answer": "if temperature > 30:"
+      },
+      "repeticoes": {
+        "question": "Your final mission: Write a while loop that repeats while \"counter\" is less than 5.",
+        "answer": "while counter < 5:"
+      },
+      "funcoes": {
+        "question": "Your final mission: Write the definition of a function called \"double\" that takes a parameter \"x\".",
+        "answer": "def double(x):"
+      }
+    }
+  },
+  "module5": {
+    "generating": "Generating challenges...",
+    "creatingPhases": "Creating 5 custom typing phases",
+    "error": "Error",
+    "errorDefault": "Error generating challenges.",
+    "errorConnection": "Connection error while generating challenges.",
+    "back": "Back",
+    "phaseLabel": "Phase {current} of {total}",
+    "challengeLabel": "Challenge {number}",
+    "tabLabel": "challenge.py",
+    "placeholder": "Type your code here...",
+    "analyzing": "Analyzing...",
+    "testCode": "Test Code",
+    "connectionError": "Connection error with the tutor.",
+    "exit": "Exit"
+  },
+  "moduleComplete": {
+    "practiceComplete": "Practice Complete!",
+    "moduleComplete": "Module Complete!",
+    "extraPhases": "Extra phases",
+    "time": "Time",
+    "kodeScore": "KodeScore",
+    "continue": "Continue"
+  },
+  "streak": {
+    "title": "Congratulations, your first day of many in programming!",
+    "continue": "Continue"
+  },
+  "streakPending": {
+    "sparkTitle": "A new day!",
+    "instruction": "Swipe up to ignite and activate your streak!",
+    "almostThere": "Almost there! Keep going!",
+    "success": "🔥 {count} day streak!",
+    "congratulations": "{count} days of streak!",
+    "tryAgain": "Try again!",
+    "continue": "Continue"
+  },
+  "streakLost": {
+    "title": "Your streak burned out!",
+    "subtitle": "You had a streak of {count} days. Every day is a new chance!",
+    "continue": "Start new streak"
+  },
+  "footer": {
+    "text": "made with luv by",
+    "author": "Igor Dias"
+  },
+  "login": {
+    "typewriterWords": ["you learn.", "you build.", "you grow."],
+    "unconfiguredTitle": "firstKodes",
+    "unconfiguredDesc": "Supabase is not configured. Add the environment variables in",
+    "continueWithoutAccount": "Continue without account",
+    "hero": "firstKodes is where",
+    "description": "An effective platform for your first steps in programming.",
+    "brand": "firstKodes",
+    "formTitle": "Start your journey",
+    "formSubtitle": "Sign in with Google or GitHub to save your progress",
+    "google": "Google",
+    "github": "GitHub",
+    "footer": "made with luv by",
+    "author": "Igor Dias"
+  },
+  "api": {
+    "checkCode": {
+      "noApiKey": "Internal error: API key not configured.",
+      "invalidRequest": "Invalid request. Send challenge, code and lives.",
+      "contactError": "Error contacting the tutor. ({status})",
+      "invalidResponse": "Invalid response from tutor.",
+      "unexpectedFormat": "Unexpected response format from tutor.",
+      "internalError": "Internal server error. Try again."
+    },
+    "generatePractice": {
+      "noApiKey": "Internal error: API key not configured.",
+      "invalidRequest": "Invalid request. Send moduleName.",
+      "contactError": "Error contacting the exercise generator. ({status})",
+      "invalidResponse": "Invalid response from the exercise generator.",
+      "unexpectedFormat": "Unexpected response format from the exercise generator.",
+      "noValidQuestions": "No valid questions were generated. Try again.",
+      "internalError": "Internal server error. Try again."
+    },
+    "generateModule5": {
+      "noApiKey": "Internal error: API key not configured.",
+      "contactError": "Error contacting the challenge generator. ({status})",
+      "invalidResponse": "Invalid response from the challenge generator.",
+      "unexpectedFormat": "Unexpected response format.",
+      "noValidChallenges": "No valid challenges were generated. Try again.",
+      "internalError": "Internal server error. Try again."
+    },
+    "progress": {
+      "notConfigured": "Supabase not configured",
+      "notAuthenticated": "Not authenticated"
+    }
+  }
+}

@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import { Crown, Heart, Loader2, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { useTranslations, useLocale } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { MODULE_BASE_POINTS } from '@/hooks/useProgress';
 import type { TypingChallenge } from '@/app/api/generate-module5/route';
@@ -22,6 +23,8 @@ export default function Module5Game({
   onExit,
   onAddKodeScore,
 }: Module5GameProps) {
+  const t = useTranslations('module5');
+  const locale = useLocale();
   const [challenges, setChallenges] = useState<TypingChallenge[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [lives, setLives] = useState(3);
@@ -40,23 +43,23 @@ export default function Module5Game({
         const res = await fetch('/api/generate-module5', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({}),
+          body: JSON.stringify({ locale }),
         });
         if (!res.ok) {
-          const err = await res.json().catch(() => ({ error: 'Erro ao gerar desafios.' }));
-          setError(err.error ?? 'Erro ao gerar desafios.');
+          const err = await res.json().catch(() => ({ error: t('errorDefault') }));
+          setError(err.error ?? t('errorDefault'));
           return;
         }
         const data = await res.json();
         setChallenges(data.challenges);
       } catch {
-        setError('Erro de conexão ao gerar desafios.');
+        setError(t('errorConnection'));
       } finally {
         setFetching(false);
       }
     }
     load();
-  }, []);
+  }, [locale, t]);
 
   const challenge = challenges[currentIndex];
   const total = challenges.length;
@@ -71,11 +74,11 @@ export default function Module5Game({
       const res = await fetch('/api/check-code', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ challenge: challenge.question, code, lives }),
+        body: JSON.stringify({ challenge: challenge.question, code, lives, locale }),
       });
 
       if (!res.ok) {
-        setFeedback('Erro de conexão com o tutor.');
+        setFeedback(t('connectionError'));
         return;
       }
 
@@ -115,7 +118,7 @@ export default function Module5Game({
         }
       }
     } catch {
-      setFeedback('Erro de conexão com o tutor.');
+      setFeedback(t('connectionError'));
     } finally {
       setIsLoading(false);
     }
@@ -130,8 +133,8 @@ export default function Module5Game({
           className="text-center"
         >
           <Loader2 size={48} className="mx-auto mb-6 animate-spin text-purple-400" />
-          <h2 className="mb-2 text-xl font-bold text-zinc-50">Gerando desafios...</h2>
-          <p className="text-zinc-400">Criando 5 fases de digitação personalizadas</p>
+          <h2 className="mb-2 text-xl font-bold text-zinc-50">{t('generating')}</h2>
+          <p className="text-zinc-400">{t('creatingPhases')}</p>
         </motion.div>
       </div>
     );
@@ -145,13 +148,13 @@ export default function Module5Game({
           animate={{ scale: 1, opacity: 1 }}
           className="text-center"
         >
-          <h2 className="mb-2 text-xl font-bold text-red-400">Erro</h2>
+          <h2 className="mb-2 text-xl font-bold text-red-400">{t('error')}</h2>
           <p className="mb-8 text-zinc-400">{error}</p>
           <button
             onClick={onExit}
             className="rounded-xl bg-purple-600 px-8 py-3 text-base font-bold text-white transition-all hover:bg-purple-500"
           >
-            Voltar
+            {t('back')}
           </button>
         </motion.div>
       </div>
@@ -169,7 +172,7 @@ export default function Module5Game({
       <header className="flex items-center gap-2 pt-6 pb-4 md:gap-4">
         <div className="flex-1">
           <div className="mb-1.5 flex items-center justify-between text-xs text-zinc-500">
-            <span>Fase {displayPhase} de {total}</span>
+            <span>{t('phaseLabel', { current: displayPhase, total })}</span>
             <div className="flex items-center gap-1">
               {[1, 2, 3].map((i) => (
                 <Heart
@@ -193,7 +196,7 @@ export default function Module5Game({
         <button
           onClick={onExit}
           className="flex size-9 items-center justify-center rounded-full bg-zinc-800 text-zinc-400 transition-colors hover:bg-zinc-700 hover:text-zinc-50"
-          aria-label="Sair"
+          aria-label={t('exit')}
         >
           <X size={18} />
         </button>
@@ -203,7 +206,7 @@ export default function Module5Game({
         <div className="flex size-8 items-center justify-center rounded-lg bg-amber-600/20">
           <Crown size={18} className="text-amber-400" />
         </div>
-        <span className="text-sm font-medium text-zinc-400">Desafio {displayPhase}</span>
+        <span className="text-sm font-medium text-zinc-400">{t('challengeLabel', { number: displayPhase })}</span>
       </div>
 
       <motion.div
@@ -229,7 +232,7 @@ export default function Module5Game({
             <div className="size-2.5 rounded-full bg-yellow-500/60" />
             <div className="size-2.5 rounded-full bg-emerald-500/60" />
           </div>
-          <span className="text-xs text-zinc-600">desafio.py</span>
+          <span className="text-xs text-zinc-600">{t('tabLabel')}</span>
         </div>
         <textarea
           value={code}
@@ -247,7 +250,7 @@ export default function Module5Game({
             }
           }}
           disabled={isLocked}
-          placeholder="Digite seu código aqui..."
+          placeholder={t('placeholder')}
           rows={6}
           className="w-full resize-none rounded-xl border border-zinc-800 bg-zinc-900/80 p-5 font-mono text-base text-zinc-100 placeholder-zinc-600 caret-purple-400 transition-colors focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/20 disabled:cursor-not-allowed disabled:opacity-50 scrollbar-thin"
         />
@@ -300,10 +303,10 @@ export default function Module5Game({
           {isLoading ? (
             <span className="flex items-center justify-center gap-2">
               <Loader2 size={18} className="animate-spin" />
-              Analisando...
+              {t('analyzing')}
             </span>
           ) : (
-            'Testar Código'
+            t('testCode')
           )}
         </motion.button>
       </div>

@@ -60,7 +60,8 @@ Os pontos são acumulados ao longo de toda a jornada e exibidos no cabeçalho co
 - 👑 **Desafio Chefão** — Fase final com editor de código livre e tutoria do Clippy
 - 🦎 **Tutor IA (Clippy)** — Feedback contextual que se adapta ao número de vidas restantes
 - 🎠 **Carrossel de Módulos** — Navegação intuitiva com animações suaves
-- 🔥 **Celebração de Streak** — Comemoração ao completar o primeiro módulo do dia
+- 🔥 **Sistema de Streak (Ofensiva)** — Ao concluir uma fase por dia, a chama cinza se transforma em laranja (cresce e muda de cor) ao "acender" (arraste para cima). Cresce +1 por dia consecutivo e zera se um dia for pulado
+- 🌐 **Internacionalização (i18n)** — Suporte a Português e Inglês com roteamento por locale (`/[locale]`) via `next-intl`
 - 🎯 **Avanço Manual** — Após acertar, botão "Próxima fase" para avançar no seu ritmo
 - 💜 **Design Responsivo** — Interface adaptada para mobile e desktop com animações suaves entre fases
 
@@ -75,6 +76,7 @@ Os pontos são acumulados ao longo de toda a jornada e exibidos no cabeçalho co
 | 🛡️ | [TypeScript](https://www.typescriptlang.org/) | 5.7 | Tipagem estática |
 | 🎨 | [Tailwind CSS](https://tailwindcss.com/) | 3.4 | Estilização utilitária |
 | 🌀 | [Framer Motion](https://www.framer.com/motion/) | 11.15 | Animações e transições |
+| 🌐 | [next-intl](https://next-intl.dev/) | 3.x | Internacionalização (i18n) e roteamento por locale |
 | 🎯 | [Lucide React](https://lucide.dev/) | 0.468 | Ícones |
 | 🗄️ | [Supabase](https://supabase.com/) | — | Autenticação e banco de dados |
 | 🧠 | [OpenRouter API](https://openrouter.ai/) | — | Integração com modelos de IA |
@@ -177,42 +179,62 @@ No Google Cloud Console, configure:
 ```
 src/
 ├── app/
-│   ├── (auth)/
-│   │   └── login/
-│   │       └── page.tsx           # Página de login (Google / GitHub)
+│   ├── [locale]/                      # Rotas internacionalizadas (pt, en)
+│   │   ├── (auth)/
+│   │   │   └── login/page.tsx         # Página de login (Google / GitHub)
+│   │   ├── layout.tsx                 # Layout do locale (providers, fonte)
+│   │   └── page.tsx                   # Página principal (carrossel, streak)
 │   ├── api/
-│   │   ├── check-code/route.ts     # API de tutoria IA
-│   │   ├── generate-module5/route.ts # Geração de desafio chefão IA
-│   │   ├── generate-practice/route.ts # Geração de exercícios IA
-│   │   └── progress/route.ts       # API de progresso do usuário
+│   │   ├── check-code/route.ts         # API de tutoria IA
+│   │   ├── generate-module5/route.ts   # Geração de desafio chefão IA
+│   │   ├── generate-practice/route.ts  # Geração de exercícios IA
+│   │   └── progress/route.ts           # API de progresso do usuário
 │   ├── auth/
-│   │   └── callback/route.ts       # Callback OAuth (troca código por sessão)
-│   ├── globals.css                 # Estilos globais + Tailwind
-│   ├── layout.tsx                  # Layout raiz (AuthProvider, fonte Inter)
-│   ├── page.tsx                    # Página principal
-│   └── icon.svg                    # Favicon / logo
+│   │   └── callback/route.ts           # Callback OAuth (troca código por sessão)
+│   ├── layout.tsx                      # Layout raiz (AuthProvider, fonte Inter)
+│   └── globals.css                     # Estilos globais + Tailwind
 ├── components/
-│   ├── BossPhase.tsx               # Fase chefão (editor livre)
-│   ├── Carousel.tsx                # Carrossel de módulos
-│   ├── Footer.tsx                  # Rodapé
-│   ├── GameLevel.tsx               # Fase principal (seleção de palavras)
-│   ├── StreakCelebration.tsx       # Modal de streak
-│   └── User3DCard.tsx              # Card do perfil do usuário
+│   ├── BossPhase.tsx                   # Fase chefão (editor livre)
+│   ├── Carousel.tsx                    # Carrossel de módulos
+│   ├── Footer.tsx                      # Rodapé
+│   ├── GameLevel.tsx                   # Fase principal (seleção de palavras)
+│   ├── GameLevelEn.ts                  # Fase principal (versão EN)
+│   ├── Mascot.tsx                      # Mascote / Clippy (tutor IA)
+│   ├── Module5Game.tsx                 # Desafio chefão
+│   ├── ModuleComplete.tsx              # Tela de módulo concluído
+│   ├── PhaseContainer.tsx              # Container de fases
+│   ├── StreakPending.tsx               # Chama de streak (arraste p/ acender)
+│   ├── StreakLost.tsx                  # Tela de streak perdida
+│   ├── TermTooltip.tsx                 # Tooltip de termos
+│   ├── User3DCard.tsx                  # Card do perfil do usuário
+│   └── ui/                             # Componentes de UI (button, number-ticker, …)
 ├── contexts/
-│   └── AuthContext.tsx             # Contexto de autenticação (Google, GitHub, signOut)
+│   └── AuthContext.tsx                 # Contexto de autenticação
 ├── data/
-│   ├── moduleOneLevels.ts          # Fases do módulo 1 (Fundamentos)
-│   └── modulesConfig.ts            # Fases dos módulos 2, 3 e 4
+│   ├── moduleOneLevels.ts              # Fases do módulo 1 (PT)
+│   ├── moduleOneLevels.en.ts           # Fases do módulo 1 (EN)
+│   ├── modulesConfig.ts                # Fases dos módulos 2-4 (PT)
+│   ├── modulesConfig.en.ts             # Fases dos módulos 2-4 (EN)
+│   ├── termsDictionary.ts              # Glossário de termos (PT)
+│   └── termsDictionary.en.ts           # Glossário de termos (EN)
 ├── hooks/
-│   ├── useProgress.ts              # Hook de progresso (localStorage)
-│   └── useScrollAnimation.ts      # Hook de animação de scroll
+│   ├── useProgress.ts                  # Hook de progresso (streak, vidas, score)
+│   └── useSound.ts                     # Efeitos sonoros da streak
+├── i18n/
+│   ├── navigation.ts                   # Helpers de navegação i18n
+│   ├── request.ts                      # Config de locale da requisição
+│   └── routing.ts                      # Locales suportados
 ├── lib/
-│   └── supabase/
-│       ├── client.ts               # Cliente Supabase (browser)
-│       └── server.ts               # Cliente Supabase (server)
-├── middleware.ts                   # Proteção de rotas (auth)
+│   ├── supabase/
+│   │   ├── client.ts                   # Cliente Supabase (browser)
+│   │   └── server.ts                   # Cliente Supabase (server)
+│   └── utils.ts                        # Utilitários gerais
+├── messages/
+│   ├── pt.json                         # Traduções (Português)
+│   └── en.json                         # Traduções (Inglês)
+├── middleware.ts                       # Proteção de rotas + i18n
 └── types/
-    └── css.d.ts                    # Declaração de tipos CSS
+    └── css.d.ts                        # Declaração de tipos CSS
 ```
 
 ---

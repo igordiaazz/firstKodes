@@ -3,12 +3,14 @@
 import { motion } from 'framer-motion';
 import { Crown, Heart, Loader2, X } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 
 interface BossPhaseProps {
   moduleTitle: string;
   question: string;
   basePoints: number;
+  locale: string;
   onAddKodeScore?: (points: number) => void;
   onComplete: () => void;
   onExit: () => void;
@@ -18,10 +20,12 @@ export default function BossPhase({
   moduleTitle,
   question,
   basePoints,
+  locale,
   onAddKodeScore,
   onComplete,
   onExit,
 }: BossPhaseProps) {
+  const t = useTranslations('boss');
   const [code, setCode] = useState('');
   const [lives, setLives] = useState(3);
   const [clippyFeedback, setClippyFeedback] = useState<string | null>(null);
@@ -39,11 +43,11 @@ export default function BossPhase({
       const res = await fetch('/api/check-code', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ challenge: question, code, lives }),
+        body: JSON.stringify({ challenge: question, code, lives, locale }),
       });
 
       if (!res.ok) {
-        setClippyFeedback('Erro de conexão com o tutor.');
+        setClippyFeedback(t('connectionError'));
         return;
       }
 
@@ -62,7 +66,7 @@ export default function BossPhase({
         setClippyFeedback(data.feedback);
       }
     } catch {
-      setClippyFeedback('Erro de conexão com o tutor.');
+      setClippyFeedback(t('connectionError'));
     } finally {
       setIsLoading(false);
     }
@@ -91,7 +95,7 @@ export default function BossPhase({
           </div>
           <div className="min-w-0">
             <h1 className="truncate text-base font-bold text-zinc-50 sm:text-lg">
-              Desafio do Chefe
+              {t('title')}
             </h1>
             <p className="truncate text-xs text-zinc-500">{moduleTitle}</p>
           </div>
@@ -111,7 +115,7 @@ export default function BossPhase({
         <button
           onClick={onExit}
           className="flex size-9 shrink-0 items-center justify-center rounded-full bg-zinc-800 text-zinc-400 transition-colors hover:bg-zinc-700 hover:text-zinc-50"
-          aria-label="Sair"
+          aria-label={t('exit')}
         >
           <X size={18} />
         </button>
@@ -138,7 +142,7 @@ export default function BossPhase({
             <div className="size-2.5 rounded-full bg-yellow-500/60" />
             <div className="size-2.5 rounded-full bg-emerald-500/60" />
           </div>
-          <span className="text-xs text-zinc-600">desafio.py</span>
+          <span className="text-xs text-zinc-600">{t('tabLabel')}</span>
         </div>
         <textarea
           value={code}
@@ -156,7 +160,7 @@ export default function BossPhase({
             }
           }}
           disabled={isLocked}
-          placeholder="Digite seu código aqui..."
+          placeholder={t('placeholder')}
           rows={5}
           className="w-full resize-none rounded-xl border border-zinc-800 bg-zinc-900/80 p-5 font-mono text-base text-zinc-100 placeholder-zinc-600 caret-purple-400 transition-colors focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/20 disabled:cursor-not-allowed disabled:opacity-50 scrollbar-thin"
         />
@@ -200,10 +204,10 @@ export default function BossPhase({
           {isLoading ? (
             <span className="flex items-center justify-center gap-2">
               <Loader2 size={18} className="animate-spin" />
-              Analisando...
+              {t('analyzing')}
             </span>
           ) : (
-            'Testar Código'
+            t('testCode')
           )}
         </motion.button>
       </div>

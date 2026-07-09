@@ -1,11 +1,13 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Braces,
   Code,
   Flame,
   GitBranch,
+  Globe,
+  Hexagon,
   Loader2,
   LogOut,
   Repeat,
@@ -13,25 +15,34 @@ import {
   Star,
   User,
   X,
-  Hexagon,
 } from 'lucide-react';
 import User3DCard from '@/components/User3DCard';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from '@/i18n/navigation';
+import { useLocale, useTranslations } from 'next-intl';
 import Carousel from '@/components/Carousel';
 import Footer from '@/components/Footer';
 import GameLevel, { BOSS_CHALLENGES } from '@/components/GameLevel';
+import { BOSS_CHALLENGES_EN } from '@/components/GameLevelEn';
 import Module5Game from '@/components/Module5Game';
-import StreakCelebration from '@/components/StreakCelebration';
+import StreakPending from '@/components/StreakPending';
+import StreakLost from '@/components/StreakLost';
 import ModuleComplete from '@/components/ModuleComplete';
 import { moduleOneLevels } from '@/data/moduleOneLevels';
+import { moduleOneLevelsEn } from '@/data/moduleOneLevels.en';
 import {
   moduleTwoLevels,
   moduleThreeLevels,
   moduleFourLevels,
 } from '@/data/modulesConfig';
+import {
+  moduleTwoLevelsEn,
+  moduleThreeLevelsEn,
+  moduleFourLevelsEn,
+} from '@/data/modulesConfig.en';
 import { useProgress, getModuleNumber } from '@/hooks/useProgress';
+import { useSound } from '@/hooks/useSound';
 import { NumberTicker } from '@/components/ui/number-ticker';
 import type { LevelData } from '@/data/moduleOneLevels';
 import type { ModuleData } from '@/components/Carousel';
@@ -65,8 +76,13 @@ function getProfileDisplayName(name: string): string {
 }
 
 function Greeting({ userName }: { userName: string }) {
+  const t = useTranslations('home');
   const [greeting] = useState(() => {
-    const list = ['Olá', 'E aí', 'Que bom te ver'];
+    const list = [
+      t('greetings.0'),
+      t('greetings.1'),
+      t('greetings.2'),
+    ];
     return list[Math.floor(Math.random() * list.length)];
   });
 
@@ -90,94 +106,201 @@ function Greeting({ userName }: { userName: string }) {
 
 type View = 'home' | 'game';
 
-const MODULES_META = [
-  {
-    id: 'fundamentos',
-    title: 'Fundamentos',
-    description: 'Variáveis, tipos de dados e operadores básicos',
-    icon: Code,
-  },
-  {
-    id: 'decisoes',
-    title: 'Decisões',
-    description: 'Estruturas condicionais (if/else, switch)',
-    icon: GitBranch,
-  },
-  {
-    id: 'repeticoes',
-    title: 'Repetições',
-    description: 'Loops (for, while, do-while)',
-    icon: Repeat,
-  },
-  {
-    id: 'funcoes',
-    title: 'Funções e Listas',
-    description: 'Funções, arrays e listas encadeadas',
-    icon: Braces,
-  },
-  {
-    id: 'modulo5',
-    title: 'Desafios Finais',
-    description: 'Desafios de digitação com Python do zero',
-    icon: Star,
-  },
-];
+function LanguageToggle({ locale, compact }: { locale: string; compact?: boolean }) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const t = useTranslations('settings');
+  const [open, setOpen] = useState(false);
 
-const LEVELS_MAP: Record<string, LevelData[]> = {
-  fundamentos: moduleOneLevels,
-  decisoes: moduleTwoLevels,
-  repeticoes: moduleThreeLevels,
-  funcoes: moduleFourLevels,
-  modulo5: [],
-};
+  const switchLocale = (newLocale: string) => {
+    if (newLocale === locale) return;
+    router.push(pathname, { locale: newLocale });
+    setOpen(false);
+  };
 
-const MODULE_NAMES: Record<string, string> = {
-  fundamentos: 'Fundamentos',
-  decisoes: 'Decisões',
-  repeticoes: 'Repetições',
-  funcoes: 'Funções e Listas',
-  modulo5: 'Desafios Finais',
-};
+  if (compact) {
+    return (
+      <div className="relative">
+        <button
+          onClick={() => setOpen(!open)}
+          className="flex size-9 items-center justify-center rounded-full bg-zinc-900/80 text-zinc-400 backdrop-blur-sm transition-colors hover:text-zinc-50"
+          aria-label={t('languageLabel')}
+        >
+          <Globe size={16} className="sm:size-5" />
+        </button>
+        <AnimatePresence>
+          {open && (
+            <motion.div
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.15 }}
+              className="absolute right-0 top-full mt-1 w-36 rounded-lg border border-zinc-700 bg-zinc-900 py-1 shadow-xl z-50"
+            >
+              <button
+                onClick={() => switchLocale('pt')}
+                className={`flex w-full items-center gap-2 px-3 py-2 text-xs font-medium transition-colors hover:bg-zinc-800 ${locale === 'pt' ? 'text-purple-400' : 'text-zinc-400'}`}
+              >
+                <span className="text-base leading-none">🇧🇷</span>
+                {t('portuguese')}
+              </button>
+              <button
+                onClick={() => switchLocale('en')}
+                className={`flex w-full items-center gap-2 px-3 py-2 text-xs font-medium transition-colors hover:bg-zinc-800 ${locale === 'en' ? 'text-purple-400' : 'text-zinc-400'}`}
+              >
+                <span className="text-base leading-none">🇺🇸</span>
+                {t('english')}
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setOpen(!open)}
+        className="flex items-center gap-2 rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-1.5 text-xs font-medium text-zinc-300 transition-colors hover:bg-zinc-700 hover:text-zinc-50"
+      >
+        <span className="text-base leading-none">{locale === 'pt' ? '🇧🇷' : '🇺🇸'}</span>
+        <span>{locale === 'pt' ? 'PT' : 'EN'}</span>
+      </button>
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.15 }}
+            className="absolute right-0 top-full mt-1 w-36 rounded-lg border border-zinc-700 bg-zinc-900 py-1 shadow-xl z-50"
+          >
+            <button
+              onClick={() => switchLocale('pt')}
+              className={`flex w-full items-center gap-2 px-3 py-2 text-xs font-medium transition-colors hover:bg-zinc-800 ${locale === 'pt' ? 'text-purple-400' : 'text-zinc-400'}`}
+            >
+              <span className="text-base leading-none">🇧🇷</span>
+              {t('portuguese')}
+            </button>
+            <button
+              onClick={() => switchLocale('en')}
+              className={`flex w-full items-center gap-2 px-3 py-2 text-xs font-medium transition-colors hover:bg-zinc-800 ${locale === 'en' ? 'text-purple-400' : 'text-zinc-400'}`}
+            >
+              <span className="text-base leading-none">🇺🇸</span>
+              {t('english')}
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
 
 export default function Home() {
   const { user, loading: authLoading, isConfigured, signOut } = useAuth();
   const router = useRouter();
+  const locale = useLocale();
+  const homePathname = usePathname();
+  const tm = useTranslations('modules');
+  const ts = useTranslations('settings');
+  const tp = useTranslations('practice');
+  const tn = useTranslations('nameModal');
+  const tpr = useTranslations('profile');
+
+  const isEn = locale === 'en';
+
   const [view, setView] = useState<View>('home');
   const [activeModuleId, setActiveModuleId] = useState<string | null>(null);
   const [showSettings, setShowSettings] = useState(false);
   const [showProfileCard, setShowProfileCard] = useState(false);
-  const [showStreakCelebration, setShowStreakCelebration] = useState(false);
+  const [showStreakLost, setShowStreakLost] = useState(false);
+  const [lostStreakCount, setLostStreakCount] = useState(0);
   const [elapsedTime, setElapsedTime] = useState<number | null>(null);
   const [practiceQuestions, setPracticeQuestions] = useState<PracticeQuestion[] | null>(null);
   const [sessionKodeScore, setSessionKodeScore] = useState(0);
   const [practiceLoading, setPracticeLoading] = useState(false);
   const [practiceError, setPracticeError] = useState<string | null>(null);
-  const prevStreakRef = useRef<number | null>(null);
   const {
     progress,
     hydrated,
+    pendingStreak,
     completePhase,
     completeModule,
+    confirmStreak,
+    checkStreakLost,
     addKodeScore,
     setModuleStartTime,
     resetProgress,
     adminCompleteAll,
   } = useProgress();
+  const { play } = useSound();
+
+  const MODULES_META = useMemo(() => [
+    {
+      id: 'fundamentos',
+      title: tm('fundamentos.title'),
+      description: tm('fundamentos.description'),
+      icon: Code,
+    },
+    {
+      id: 'decisoes',
+      title: tm('decisoes.title'),
+      description: tm('decisoes.description'),
+      icon: GitBranch,
+    },
+    {
+      id: 'repeticoes',
+      title: tm('repeticoes.title'),
+      description: tm('repeticoes.description'),
+      icon: Repeat,
+    },
+    {
+      id: 'funcoes',
+      title: tm('funcoes.title'),
+      description: tm('funcoes.description'),
+      icon: Braces,
+    },
+    {
+      id: 'modulo5',
+      title: tm('modulo5.title'),
+      description: tm('modulo5.description'),
+      icon: Star,
+    },
+  ], [tm]);
+
+  const LEVELS_MAP: Record<string, LevelData[]> = useMemo(() => ({
+    fundamentos: isEn ? moduleOneLevelsEn : moduleOneLevels,
+    decisoes: isEn ? moduleTwoLevelsEn : moduleTwoLevels,
+    repeticoes: isEn ? moduleThreeLevelsEn : moduleThreeLevels,
+    funcoes: isEn ? moduleFourLevelsEn : moduleFourLevels,
+    modulo5: [],
+  }), [isEn]);
+
+  const BOSS_MAP = isEn ? BOSS_CHALLENGES_EN : BOSS_CHALLENGES;
+
+  const MODULE_NAMES: Record<string, string> = useMemo(() => ({
+    fundamentos: tm('fundamentos.title'),
+    decisoes: tm('decisoes.title'),
+    repeticoes: tm('repeticoes.title'),
+    funcoes: tm('funcoes.title'),
+    modulo5: tm('modulo5.title'),
+  }), [tm]);
+
+  useEffect(() => {
+    if (!user && isConfigured && !authLoading) {
+      router.push(`/${locale}/login`);
+    }
+  }, [user, isConfigured, authLoading, router, locale]);
 
   useEffect(() => {
     if (!hydrated) return;
-    if (prevStreakRef.current === null) {
-      prevStreakRef.current = progress.streak;
-      return;
+    const result = checkStreakLost();
+    if (result.lost) {
+      setLostStreakCount(result.count);
+      setShowStreakLost(true);
     }
-    if (prevStreakRef.current === 0 && progress.streak === 1) {
-      if (elapsedTime !== null) {
-        return;
-      }
-      setShowStreakCelebration(true);
-    }
-    prevStreakRef.current = progress.streak;
-  }, [progress.streak, hydrated, elapsedTime]);
+  }, [hydrated, checkStreakLost]);
 
   const modules: ModuleData[] = useMemo(
     () =>
@@ -186,12 +309,12 @@ export default function Home() {
         const levels = LEVELS_MAP[meta.id] ?? [];
         return {
           ...meta,
-          totalPhases: meta.id === 'modulo5' ? 5 : levels.length + (BOSS_CHALLENGES[meta.id] ? 1 : 0),
+          totalPhases: meta.id === 'modulo5' ? 5 : levels.length + (BOSS_MAP[meta.id] ? 1 : 0),
           phasesCompleted: progress.phasesCompleted[meta.id] ?? 0,
           unlocked: progress.unlockedModules.includes(num),
         };
       }),
-    [progress],
+    [progress, MODULES_META, LEVELS_MAP, BOSS_MAP],
   );
 
   const handleStartModule = useCallback(
@@ -209,7 +332,8 @@ export default function Home() {
     if (progress.moduleStartTime > 0) {
       setElapsedTime(Date.now() - progress.moduleStartTime);
     }
-  }, [progress.moduleStartTime]);
+    play('moduleComplete');
+  }, [progress.moduleStartTime, play]);
 
   const handlePracticeModule = useCallback(
     async (moduleId: string) => {
@@ -225,22 +349,22 @@ export default function Home() {
         const res = await fetch('/api/generate-practice', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ moduleName: MODULE_NAMES[moduleId] ?? moduleId }),
+          body: JSON.stringify({ moduleName: MODULE_NAMES[moduleId] ?? moduleId, locale }),
         });
         if (!res.ok) {
-          const err = await res.json().catch(() => ({ error: 'Erro ao gerar prática.' }));
-          setPracticeError(err.error ?? 'Erro ao gerar prática.');
+          const err = await res.json().catch(() => ({ error: tp('errorDefault') }));
+          setPracticeError(err.error ?? tp('errorDefault'));
           return;
         }
         const data = await res.json();
         setPracticeQuestions(data.questions);
       } catch {
-        setPracticeError('Erro de conexão ao gerar prática.');
+        setPracticeError(tp('errorConnection'));
       } finally {
         setPracticeLoading(false);
       }
     },
-    [setModuleStartTime],
+    [setModuleStartTime, MODULE_NAMES, locale, tp],
   );
 
   const handleAddKodeScore = useCallback((points: number) => {
@@ -258,14 +382,15 @@ export default function Home() {
   const handleComplete = useCallback(
     (moduleId: string, phasesCompleted: number) => {
       completePhase(moduleId, phasesCompleted);
+      play('levelComplete');
     },
-    [completePhase],
+    [completePhase, play],
   );
 
   const handleSignOut = useCallback(async () => {
     await signOut();
-    router.push('/login');
-  }, [signOut, router]);
+    router.push(`/${locale}/login`);
+  }, [signOut, router, locale]);
 
   const [customName, setCustomName] = useState<string | null>(null);
   const [showNameModal, setShowNameModal] = useState(false);
@@ -289,6 +414,7 @@ export default function Home() {
     }
   }, [user, hydrated]);
 
+  const tHome = useTranslations('home');
   const rawName =
     customName ??
     user?.user_metadata?.name ??
@@ -296,7 +422,7 @@ export default function Home() {
     user?.user_metadata?.user_name ??
     user?.user_metadata?.display_name ??
     user?.email?.split('@')[0] ??
-    'viajante';
+    tHome('fallbackName');
 
   const userName = rawName ? formatName(rawName, 1) : '';
   const profileDisplayName = rawName ? getProfileDisplayName(rawName) : '';
@@ -310,7 +436,6 @@ export default function Home() {
   }
 
   if (isConfigured && !user) {
-    router.push('/login');
     return null;
   }
 
@@ -318,7 +443,10 @@ export default function Home() {
     return (
       <>
         <Module5Game
-          onComplete={(phasesCompleted) => completePhase('modulo5', phasesCompleted)}
+          onComplete={(phasesCompleted) => {
+              completePhase('modulo5', phasesCompleted);
+              play('levelComplete');
+            }}
           onModuleComplete={() => completeModule(5)}
           onModuleCompleted={handleModuleCompleted}
           onExit={handleExitGame}
@@ -327,7 +455,7 @@ export default function Home() {
         {elapsedTime !== null && (
           <ModuleComplete
             elapsedMs={elapsedTime}
-            moduleTitle="Desafios Finais"
+            moduleTitle={MODULE_NAMES['modulo5']}
             kodeScore={sessionKodeScore}
             onClose={() => {
               setElapsedTime(null);
@@ -353,10 +481,10 @@ export default function Home() {
           >
             <Loader2 size={48} className="mx-auto mb-6 animate-spin text-purple-400" />
             <h2 className="mb-2 text-xl font-bold text-zinc-50">
-              Gerando prática...
+              {tp('generating')}
             </h2>
             <p className="text-zinc-400">
-              Criando 5 fases personalizadas para {MODULE_NAMES[activeModuleId]}
+              {tp('creatingPhases', { moduleName: MODULE_NAMES[activeModuleId] })}
             </p>
           </motion.div>
         </div>
@@ -371,13 +499,13 @@ export default function Home() {
             animate={{ scale: 1, opacity: 1 }}
             className="text-center"
           >
-            <h2 className="mb-2 text-xl font-bold text-red-400">Erro</h2>
+            <h2 className="mb-2 text-xl font-bold text-red-400">{tp('error')}</h2>
             <p className="mb-8 text-zinc-400">{practiceError}</p>
             <button
               onClick={handleExitGame}
               className="rounded-xl bg-purple-600 px-8 py-3 text-base font-bold text-white transition-all hover:bg-purple-500"
             >
-              Voltar
+              {tp('back')}
             </button>
           </motion.div>
         </div>
@@ -429,10 +557,11 @@ export default function Home() {
               {progress.streak}
             </span>
           </div>
+          <LanguageToggle locale={locale} compact />
           <button
             onClick={() => setShowSettings(true)}
             className="flex size-9 items-center justify-center rounded-full bg-zinc-900/80 text-zinc-400 backdrop-blur-sm transition-colors hover:text-zinc-50 sm:size-10"
-            aria-label="Configurações"
+            aria-label={ts('title')}
           >
             <Settings size={16} className="sm:size-5" />
           </button>
@@ -440,7 +569,7 @@ export default function Home() {
             <button
               onClick={() => setShowProfileCard(true)}
               className="flex size-9 items-center justify-center rounded-full bg-zinc-900/80 text-zinc-400 backdrop-blur-sm transition-colors hover:text-zinc-50 sm:size-10"
-              aria-label="Perfil"
+              aria-label={tpr('title')}
             >
               <User size={16} className="sm:size-5" />
             </button>
@@ -456,9 +585,17 @@ export default function Home() {
           onAdminUnlock={adminCompleteAll}
         />
 
-        <StreakCelebration
-          show={showStreakCelebration}
-          onClose={() => setShowStreakCelebration(false)}
+        {pendingStreak > 0 && (
+            <StreakPending
+              pendingStreak={pendingStreak}
+              onConfirm={confirmStreak}
+            />
+        )}
+
+        <StreakLost
+          show={showStreakLost}
+          lostStreak={lostStreakCount}
+          onClose={() => setShowStreakLost(false)}
         />
       </div>
 
@@ -473,14 +610,14 @@ export default function Home() {
             animate={{ scale: 1, opacity: 1 }}
             className="relative mx-4 w-full max-w-sm sm:w-80 rounded-xl border border-zinc-800 bg-zinc-900 p-6 shadow-xl"
           >
-            <h2 className="mb-2 text-lg font-bold text-zinc-50">Como quer ser chamado?</h2>
+            <h2 className="mb-2 text-lg font-bold text-zinc-50">{tn('title')}</h2>
             <p className="mb-6 text-sm text-zinc-500">
-              Escolha um nome para aparecer nas saudações
+              {tn('subtitle')}
             </p>
             <input
               type="text"
               id="nameInput"
-              placeholder="Seu nome"
+              placeholder={tn('placeholder')}
               autoFocus
               maxLength={20}
               onKeyDown={(e) => {
@@ -498,7 +635,7 @@ export default function Home() {
                 onClick={() => setShowNameModal(false)}
                 className="flex-1 rounded-xl border border-zinc-700 px-4 py-3 text-sm font-medium text-zinc-400 transition-colors hover:bg-zinc-800"
               >
-                Pular
+                {tn('skip')}
               </button>
               <button
                 onClick={() => {
@@ -512,7 +649,7 @@ export default function Home() {
                 }}
                 className="flex-1 rounded-xl bg-white px-4 py-3 text-sm font-semibold text-black transition-colors hover:bg-zinc-200"
               >
-                Salvar
+                {tn('save')}
               </button>
             </div>
           </motion.div>
@@ -539,7 +676,7 @@ export default function Home() {
             <button
               onClick={() => setShowSettings(false)}
               className="absolute top-4 right-4 text-zinc-500 hover:text-zinc-300 transition-colors"
-              aria-label="Fechar"
+              aria-label={ts('close')}
             >
               <X size={18} />
             </button>
@@ -548,28 +685,29 @@ export default function Home() {
               <div className="flex size-10 items-center justify-center rounded-lg bg-purple-600/20">
                 <Settings size={20} className="text-purple-400" />
               </div>
-              <h2 className="text-lg font-bold text-zinc-50">Configurações</h2>
+              <h2 className="text-lg font-bold text-zinc-50">{ts('title')}</h2>
             </div>
+
             <div className="mb-4 border-t border-zinc-800" />
             <p className="mb-4 text-sm text-zinc-400">
-              Esta ação irá apagar todo o seu progresso, incluindo fases concluídas e streak.
+              {ts('warning')}
             </p>
             <div className="flex gap-2">
               <button
                 onClick={() => setShowSettings(false)}
                 className="flex-1 rounded-lg border border-zinc-700 px-4 py-3 text-sm font-semibold text-zinc-300 transition-colors hover:bg-zinc-800"
               >
-                Cancelar
+                {ts('cancel')}
               </button>
               <button
                 onClick={() => {
-                  resetProgress();
-                  setShowStreakCelebration(false);
-                  setShowSettings(false);
+                    resetProgress();
+                    setShowStreakLost(false);
+                    setShowSettings(false);
                 }}
                 className="flex-1 rounded-lg bg-red-600 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-red-500"
               >
-                Resetar
+                {ts('reset')}
               </button>
             </div>
 
@@ -581,7 +719,7 @@ export default function Home() {
                   className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg border border-zinc-700 px-4 py-3 text-sm font-semibold text-zinc-300 transition-colors hover:bg-zinc-800"
                 >
                   <LogOut size={16} />
-                  Sair
+                  {ts('signOut')}
                 </button>
               </>
             )}

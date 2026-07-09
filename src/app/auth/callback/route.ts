@@ -13,12 +13,16 @@ export async function GET(request: NextRequest) {
   const code = searchParams.get('code');
   const next = searchParams.get('next') ?? '/';
 
+  const locale = request.cookies.get('NEXT_LOCALE')?.value ?? 'pt';
+  const loginUrl = `${origin}/${locale}/login`;
+
   if (code) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
-      return NextResponse.redirect(`${origin}${next}`);
+      const redirectTo = next === '/' ? `/${locale}/` : next;
+      return NextResponse.redirect(`${origin}${redirectTo}`);
     }
   }
 
-  return NextResponse.redirect(`${origin}/login?error=auth_failed`);
+  return NextResponse.redirect(`${loginUrl}?error=auth_failed`);
 }
