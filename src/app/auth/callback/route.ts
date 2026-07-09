@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
   if (code) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
-      const redirectTo = next === '/' ? `/${locale}/` : next;
+      const redirectTo = next === '/' ? `/${locale}/?welcome=1` : next;
       return NextResponse.redirect(`${origin}${redirectTo}`);
     }
   }

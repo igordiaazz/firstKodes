@@ -63,6 +63,7 @@ Os pontos são acumulados ao longo de toda a jornada e exibidos no cabeçalho co
 - 🔥 **Sistema de Streak (Ofensiva)** — Ao concluir uma fase por dia, a chama cinza se transforma em laranja (cresce e muda de cor) ao "acender" (arraste para cima). Cresce +1 por dia consecutivo e zera se um dia for pulado
 - 🌐 **Internacionalização (i18n)** — Suporte a Português e Inglês com roteamento por locale (`/[locale]`) via `next-intl`
 - ⚙️ **Configurações** — Painel com troca de idioma, reset de progresso com confirmação animada (botão cinza → vermelho) e saída da conta
+- 👋 **Tela de Boas-vindas** — Exibida após login com conta ativa: animação sequencial (fade-in/slide-up) com nome e "Membro desde [mês/ano]". Contas novas veem "Bem-vindo! / Aproveite!" sem o "Membro desde". No desktop some sozinha em 5s; no mobile fecha ao tocar em "Continuar"
 - 🎯 **Avanço Manual** — Após acertar, botão "Próxima fase" para avançar no seu ritmo
 - 💜 **Design Responsivo** — Interface adaptada para mobile e desktop com animações suaves entre fases
 
@@ -208,6 +209,7 @@ src/
 │   ├── StreakLost.tsx                  # Tela de streak perdida
 │   ├── TermTooltip.tsx                 # Tooltip de termos
 │   ├── User3DCard.tsx                  # Card do perfil do usuário
+│   ├── WelcomeSplash.tsx               # Tela de boas-vindas (pós-login)
 │   └── ui/                             # Componentes de UI (button, number-ticker, …)
 ├── contexts/
 │   └── AuthContext.tsx                 # Contexto de autenticação

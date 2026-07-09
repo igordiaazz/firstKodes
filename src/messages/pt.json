@@ -18,6 +18,15 @@
     "portuguese": "Português",
     "english": "Inglês"
   },
+  "welcome": {
+    "line1Prefix": "Olá ",
+    "line2": "Bem-vindo de volta.",
+    "line3": "Obrigado por estar conosco!",
+    "memberSince": "Membro desde {month} de {year}",
+    "continue": "Continuar",
+    "newLine1": "Bem-vindo!",
+    "newLine2": "Aproveite!"
+  },
   "profile": {
     "title": "Perfil",
     "close": "Fechar",

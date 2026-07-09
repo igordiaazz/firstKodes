@@ -28,6 +28,7 @@ import { BOSS_CHALLENGES_EN } from '@/components/GameLevelEn';
 import Module5Game from '@/components/Module5Game';
 import StreakPending from '@/components/StreakPending';
 import StreakLost from '@/components/StreakLost';
+import WelcomeSplash from '@/components/WelcomeSplash';
 import ModuleComplete from '@/components/ModuleComplete';
 import { moduleOneLevels } from '@/data/moduleOneLevels';
 import { moduleOneLevelsEn } from '@/data/moduleOneLevels.en';
@@ -215,6 +216,7 @@ export default function Home() {
   const [showSettings, setShowSettings] = useState(false);
   const [confirmingReset, setConfirmingReset] = useState(false);
   const [showProfileCard, setShowProfileCard] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(false);
   const [showStreakLost, setShowStreakLost] = useState(false);
   const [lostStreakCount, setLostStreakCount] = useState(0);
   const [elapsedTime, setElapsedTime] = useState<number | null>(null);
@@ -392,6 +394,22 @@ export default function Home() {
     await signOut();
     router.push(`/${locale}/login`);
   }, [signOut, router, locale]);
+
+  const handleWelcomeDone = useCallback(() => {
+    setShowWelcome(false);
+    const url = new URL(window.location.href);
+    url.searchParams.delete('welcome');
+    window.history.replaceState({}, '', url.toString());
+  }, []);
+
+  useEffect(() => {
+    if (user && !authLoading) {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('welcome') === '1') {
+        setShowWelcome(true);
+      }
+    }
+  }, [user, authLoading]);
 
   const [customName, setCustomName] = useState<string | null>(null);
   const [showNameModal, setShowNameModal] = useState(false);
@@ -744,6 +762,21 @@ export default function Home() {
           </motion.div>
         </div>
       )}
+
+      <AnimatePresence>
+        {showWelcome && user && (
+          <WelcomeSplash
+            key="welcome"
+            firstName={userName}
+            createdAt={user.created_at ? new Date(user.created_at) : new Date()}
+            isNew={
+              !!user.created_at &&
+              Date.now() - new Date(user.created_at).getTime() < 2 * 60 * 1000
+            }
+            onDone={handleWelcomeDone}
+          />
+        )}
+      </AnimatePresence>
 
     </main>
   );
