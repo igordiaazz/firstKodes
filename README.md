@@ -67,7 +67,7 @@ Os pontos são acumulados ao longo de toda a jornada e exibidos no **card de per
 - 🔙 **Revisão entre Fases** — Botão de fase anterior no cabeçalho para voltar e revisar fases já feitas; ao revisitá-las entra em **modo revisão** (selo "Revisão"), sem conceder pontos ou alterar o progresso salvo. Navegação suave com animação de entrada a cada fase
 - 💡 **Explicação ao Acertar** — Ao acertar, um popup desliza de baixo (≈25% da tela, verde/vermelho) com a explicação do "porquê está correto" e o botão de avanço. O conteúdo rola internamente, sem scrollbar da janela
 - 📖 **Tooltips de Termos** — Palavras sublinhadas abrem a definição; o tooltip vira para cima/baixo e se posiciona para **sempre ficar dentro da tela** (mobile incluso)
-- 🎠 **Carrossel de Módulos** — Navegação intuitiva com animações suaves e **peek** do próximo card no mobile (card ativo mais estreito + máscara de fade nas laterais)
+- 🎠 **Carrossel de Módulos** — Navegação intuitiva com animações suaves; no mobile, cards não selecionados são empurrados para fora da tela (com peek lateral); no desktop, cards vizinhos ficam visíveis com redução de brilho e blur
 - 🤖 **Dica do Mascote** — O Clippy inclui a dica "Toque nas palavras sublinhadas para saber o que são!"
 - 🎯 **Avanço Manual** — Após acertar, botão "Próxima fase" para avançar no seu ritmo
 - 💜 **Design Responsivo** — Interface adaptada para mobile e desktop com animações suaves entre fases

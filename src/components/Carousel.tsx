@@ -177,9 +177,9 @@ export default function Carousel({
         className="carousel-fade h-[460px] md:h-[520px] overflow-hidden relative select-none"
         style={{
           maskImage:
-            'linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%)',
+            'none',
           WebkitMaskImage:
-            'linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%)',
+            'none',
         }}
         onTouchStart={handleDragStart}
         onTouchEnd={handleDragEnd}
@@ -201,19 +201,19 @@ export default function Carousel({
           let filter = 'blur(0px) brightness(100%)';
 
           if (centerOffset !== 0) {
-            const offsetBase = isMobile
-              ? 150 + (absOffset - 1) * 60
+              const offsetBase = isMobile
+              ? 380 + (absOffset - 1) * 80
               : 300 + (absOffset - 1) * 70;
             offsetX = offsetBase * direcao;
             scale = 0.85 - absOffset * 0.02;
             opacity = 1;
-            filter = 'blur(2px)';
+            filter = `blur(${absOffset === 1 ? 1 : 2}px) brightness(${absOffset === 1 ? 0.5 : 0.3})`;
           }
 
           return (
             <div
               key={mod.id}
-              className="absolute left-1/2 top-1/2 w-[70vw] max-w-[320px] lg:max-w-[400px] h-[440px] md:h-[480px]"
+              className="absolute left-1/2 top-1/2 w-[88vw] max-w-[380px] lg:max-w-[400px] h-[440px] md:h-[480px]"
               style={{
                 transform: `translateX(calc(-50% + ${offsetX}px)) translateY(-50%) scale(${scale})`,
                 zIndex,
