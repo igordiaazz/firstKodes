@@ -3,6 +3,7 @@ export interface LevelData {
   type?: 'complete' | 'output';
   clippyText: string;
   lessonText?: string;
+  explanation?: string;
   codePrefix: string;
   codeSuffix: string;
   options: string[];
@@ -17,9 +18,11 @@ export const moduleOneLevels: LevelData[] = [
     lessonText:
       'O comando [print] exibe algo na tela. O texto fica entre aspas \u2014 isso \u00e9 uma [string].',
     codePrefix: '',
-    codeSuffix: '("Ol\u00e1, Mundo!")',
+    codeSuffix: '("Olá, Mundo!")',
     options: ['mostrar', 'print', 'escrever'],
     answer: 'print',
+    explanation:
+      'print é o comando que exibe textos na tela. As aspas delimitam a string "Olá, Mundo!".',
   },
   {
     id: 'fase-2',
@@ -31,6 +34,8 @@ export const moduleOneLevels: LevelData[] = [
     codeSuffix: ' "Clippy"',
     options: ['=', '->', 'guardar'],
     answer: '=',
+    explanation:
+      'O símbolo = é o operador de atribuição: ele guarda o valor "Clippy" dentro da variável nome.',
   },
   {
     id: 'fase-3',
@@ -40,8 +45,10 @@ export const moduleOneLevels: LevelData[] = [
       '[N\u00fameros] para contas n\u00e3o usam aspas. [Strings] usam aspas. O Python diferencia os dois tipos.',
     codePrefix: 'vidas_restantes = ',
     codeSuffix: '',
-    options: ['"3"', 'tr\u00eas', '3'],
+    options: ['"3"', 'três', '3'],
     answer: '3',
+    explanation:
+      'Números usados em contas não levam aspas. 3 é um número inteiro; "3" seria tratado como texto.',
   },
   {
     id: 'fase-4',
@@ -53,6 +60,8 @@ export const moduleOneLevels: LevelData[] = [
     codeSuffix: ' = 20',
     options: ['novo_ponto', '20', 'pontos'],
     answer: 'pontos',
+    explanation:
+      'Para atualizar uma variável existente, repetimos o seu nome (pontos) e atribuímos o novo valor (20).',
   },
   {
     id: 'fase-5',
@@ -65,5 +74,7 @@ export const moduleOneLevels: LevelData[] = [
     codeSuffix: '',
     options: ['83', '5', '8 - 3'],
     answer: '5',
+    explanation:
+      'print(8 - 3) calcula a conta primeiro e exibe o resultado: 5.',
   },
 ];

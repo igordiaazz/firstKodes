@@ -1,7 +1,7 @@
 'use client';
 
 import { AnimatePresence, motion } from 'framer-motion';
-import { ArrowRight, Heart, Loader2, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Heart, Loader2, X } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
@@ -94,9 +94,10 @@ export default function GameLevel({
     });
   }, [practiceQuestions, propLevels]);
 
-  const [currentLevelIndex, setCurrentLevelIndex] = useState(
-    practiceQuestions ? 0 : Math.min(savedProgress, levels.length),
-  );
+  const initialLevelIndex = practiceQuestions ? 0 : Math.min(savedProgress, levels.length);
+  const [currentLevelIndex, setCurrentLevelIndex] = useState(initialLevelIndex);
+  const [furthestIndex, setFurthestIndex] = useState(initialLevelIndex);
+  const isReview = currentLevelIndex < furthestIndex;
   const [moduleLives, setModuleLives] = useState(3);
   const [selectedWord, setSelectedWord] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<'idle' | 'success' | 'error'>('idle');
@@ -201,27 +202,47 @@ export default function GameLevel({
     setMascotMessage(null);
     setMascotStatus('success');
     setEarnedPoints(pts);
-    onAddKodeScore?.(pts);
+    if (!isReview) {
+      onAddKodeScore?.(pts);
+      if (!practiceQuestions) {
+        onComplete(moduleId, Math.min(currentLevelIndex + 1, levels.length));
+      }
+    }
     confetti({
       particleCount: 80,
       spread: 60,
       origin: { y: 0.5 },
       colors: ['#a855f7', '#c084fc', '#ffffff', '#1e1b4b'],
     });
-
-    if (!practiceQuestions) {
-      onComplete(moduleId, Math.min(currentLevelIndex + 1, levels.length));
-    }
   };
 
   const handleNextPhase = () => {
     const nextIndex = currentLevelIndex + 1;
     setCurrentLevelIndex(nextIndex);
+    if (nextIndex > furthestIndex) setFurthestIndex(nextIndex);
     setSelectedWord(null);
     setFeedback('idle');
     setMascotMessage(null);
     setMascotStatus('idle');
     setEarnedPoints(null);
+  };
+
+  const handlePrevPhase = () => {
+    setCurrentLevelIndex((i) => Math.max(0, i - 1));
+    setSelectedWord(null);
+    setFeedback('idle');
+    setMascotMessage(null);
+    setMascotStatus('idle');
+    setEarnedPoints(null);
+  };
+
+  const handleRetry = () => {
+    setSelectedWord(null);
+    setFeedback('idle');
+    setMascotMessage(null);
+    setMascotStatus('idle');
+    setEarnedPoints(null);
+    clearTimeout(errorTimerRef.current);
   };
 
   const handleExit = () => {
@@ -258,7 +279,7 @@ export default function GameLevel({
   return (
     <div
       ref={containerRef}
-      className="relative mx-auto flex min-h-dvh w-full max-w-lg flex-col overflow-x-hidden bg-black px-6 outline-none"
+      className="relative mx-auto flex h-[100dvh] w-full max-w-lg flex-col overflow-hidden bg-black px-6 outline-none"
       onKeyDown={(e) => {
         if (e.key === 'Enter') {
           e.preventDefault();
@@ -273,10 +294,23 @@ export default function GameLevel({
       tabIndex={-1}
     >
       <header className="flex items-center gap-2 pt-6 pb-4 md:gap-4">
+        <button
+          onClick={handlePrevPhase}
+          disabled={currentLevelIndex === 0}
+          className="flex size-9 shrink-0 items-center justify-center rounded-full bg-zinc-800 text-zinc-400 transition-colors hover:bg-zinc-700 hover:text-zinc-50 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-zinc-800"
+          aria-label={t('prevPhase')}
+        >
+          <ArrowLeft size={18} />
+        </button>
         <div className="flex-1">
           <div className="mb-1.5 flex items-center justify-between text-xs text-zinc-500">
-            <span>
+            <span className="flex items-center gap-2">
               {t('phaseLabel', { current: displayPhase, total: totalPhases })}
+              {isReview && (
+                <span className="rounded-full bg-purple-600/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-purple-400">
+                  {t('review')}
+                </span>
+              )}
             </span>
             <div className="flex items-center gap-1">
               <AnimatePresence mode="wait">
@@ -330,13 +364,21 @@ export default function GameLevel({
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
           transition={{ duration: 0.3 }}
+          className="flex-1 overflow-y-auto"
         >
           <div className="mb-6 flex items-start gap-3">
             <Mascot status={mascotStatus} />
             <div className="relative rounded-2xl rounded-tl-sm bg-zinc-900 px-5 py-4 shadow-lg">
               <div className="absolute -left-1.5 top-4 h-3 w-3 rotate-45 bg-zinc-900" />
               <p className="text-sm leading-relaxed text-zinc-300">
-                {mascotMessage ?? level.clippyText}
+                {mascotMessage ?? (
+                  <>
+                    {level.clippyText}{' '}
+                    <span className="text-purple-300/80">
+                      {t('touchHint')}
+                    </span>
+                  </>
+                )}
               </p>
             </div>
           </div>
@@ -425,72 +467,110 @@ export default function GameLevel({
           </div>
 
           <div className="sm:mt-auto">
-            <AnimatePresence mode="wait">
-              {feedback !== 'idle' && (
-                <motion.div
-                  key={feedback}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className={cn(
-                    'mb-4 rounded-lg px-4 py-3 text-sm font-medium',
-                    feedback === 'success'
-                      ? 'bg-emerald-900/50 text-emerald-400'
-                      : 'bg-red-900/50 text-red-400',
-                  )}
-                >
-                  {feedback === 'success' ? (
-                    <span>{t('correct')} <span className="font-bold text-emerald-300">+{earnedPoints}</span></span>
-                  ) : moduleLives > 0 ? (
-                    t('wrong')
-                  ) : (
-                    t('noLives')
-                  )}
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            {moduleLives > 0 ? (
-              <div className="pb-8">
-                <motion.button
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.5 }}
-                  onClick={feedback === 'success' ? handleNextPhase : handleVerify}
-                  disabled={!selectedWord && feedback !== 'success'}
-                  className={cn(
-                    'w-full rounded-xl py-3.5 text-base font-bold transition-all',
-                    !selectedWord && feedback !== 'success'
-                      ? 'cursor-not-allowed bg-zinc-800 text-zinc-600'
-                      : feedback === 'success'
-                      ? 'bg-purple-600/20 text-purple-300 shadow-lg hover:bg-purple-600/30 active:scale-[0.98]'
-                      : 'bg-purple-600 text-white shadow-lg shadow-purple-600/25 hover:bg-purple-500 active:scale-[0.98]',
-                  )}
-                >
-                  {feedback === 'success' ? (
-                    <span className="flex items-center justify-center gap-2">
-                      {t('nextPhase')}
-                      <ArrowRight size={18} />
-                    </span>
-                  ) : (
-                    t('verify')
-                  )}
-                </motion.button>
-              </div>
-            ) : (
-              <div className="pb-8">
-                <motion.button
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  onClick={handleExit}
-                  className="w-full rounded-xl bg-purple-600 py-3.5 text-base font-bold text-white shadow-lg shadow-purple-600/25 hover:bg-purple-500 active:scale-[0.98]"
-                >
-                  {t('backToMenu')}
-                </motion.button>
-              </div>
+            {moduleLives > 0 && feedback === 'idle' && (
+              <motion.button
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+                onClick={isReview ? handleNextPhase : handleVerify}
+                disabled={!isReview && !selectedWord}
+                className={cn(
+                  'w-full rounded-xl py-3.5 text-base font-bold transition-all',
+                  (!isReview && !selectedWord)
+                    ? 'cursor-not-allowed bg-zinc-800 text-zinc-600'
+                    : isReview
+                    ? 'bg-zinc-800 text-zinc-300 shadow-lg hover:bg-zinc-700 hover:text-purple-400 active:scale-[0.98]'
+                    : 'bg-purple-600 text-white shadow-lg shadow-purple-600/25 hover:bg-purple-500 active:scale-[0.98]',
+                )}
+              >
+                {isReview ? (
+                  <span className="flex items-center justify-center gap-2">
+                    {t('nextPhase')}
+                    <ArrowRight size={18} />
+                  </span>
+                ) : (
+                  t('verify')
+                )}
+              </motion.button>
             )}
+
+            {moduleLives === 0 && (
+              <motion.button
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                onClick={handleExit}
+                className="w-full rounded-xl bg-purple-600 py-3.5 text-base font-bold text-white shadow-lg shadow-purple-600/25 hover:bg-purple-500 active:scale-[0.98]"
+              >
+                {t('backToMenu')}
+              </motion.button>
+            )}
+
           </div>
         </motion.div>
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {feedback !== 'idle' && moduleLives > 0 && (
+          <motion.div
+            key="feedback-popup"
+            initial={{ y: '100%' }}
+            animate={{ y: 0 }}
+            exit={{ y: '100%' }}
+            transition={{ type: 'spring', stiffness: 260, damping: 28 }}
+            className={cn(
+              'flex h-[25vh] shrink-0 flex-col rounded-t-2xl border-t border-white/10 px-6 py-4 shadow-2xl backdrop-blur-md',
+              feedback === 'success'
+                ? 'bg-emerald-950/95'
+                : 'bg-red-950/95',
+            )}
+          >
+            <p
+              className={cn(
+                'flex-1 overflow-y-auto pr-1 text-sm leading-relaxed [scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
+                feedback === 'success' ? 'text-emerald-200' : 'text-red-200',
+              )}
+            >
+              {feedback === 'success' ? (
+                <>
+                  <span className="font-bold">
+                    {t('correct')}
+                    {earnedPoints != null && (
+                      <span className="ml-1 text-emerald-400">+{earnedPoints}</span>
+                    )}
+                  </span>
+                  <br />
+                  {level.explanation ?? t('correct')}
+                </>
+              ) : (
+                t('wrong')
+              )}
+            </p>
+            <div className="mt-3 pt-1">
+              {feedback === 'success' ? (
+                <motion.button
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.15 }}
+                  onClick={handleNextPhase}
+                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-purple-600 py-3.5 text-base font-bold text-white shadow-lg shadow-purple-600/25 hover:bg-purple-500 active:scale-[0.98]"
+                >
+                  {t('nextPhase')}
+                  <ArrowRight size={18} />
+                </motion.button>
+              ) : (
+                <motion.button
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.15 }}
+                  onClick={handleRetry}
+                  className="w-full rounded-xl bg-zinc-800 py-3.5 text-base font-bold text-zinc-200 shadow-lg hover:bg-zinc-700 active:scale-[0.98]"
+                >
+                  {t('tryAgain')}
+                </motion.button>
+              )}
+            </div>
+          </motion.div>
+        )}
       </AnimatePresence>
     </div>
   );

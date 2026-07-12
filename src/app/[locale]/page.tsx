@@ -7,7 +7,6 @@ import {
   Flame,
   GitBranch,
   Globe,
-  Hexagon,
   Loader2,
   LogOut,
   Repeat,
@@ -44,7 +43,6 @@ import {
 } from '@/data/modulesConfig.en';
 import { useProgress, getModuleNumber } from '@/hooks/useProgress';
 import { useSound } from '@/hooks/useSound';
-import { NumberTicker } from '@/components/ui/number-ticker';
 import type { LevelData } from '@/data/moduleOneLevels';
 import type { ModuleData } from '@/components/Carousel';
 import type { PracticeQuestion } from '@/app/api/generate-practice/route';
@@ -568,17 +566,11 @@ export default function Home() {
           <Greeting userName={userName} />
         </div>
         <div className="flex shrink-0 items-center gap-2">
-          <div className="flex flex-col gap-1 sm:flex-row sm:gap-2">
-            <div className="flex h-4 items-center gap-1 rounded-full bg-zinc-900/80 px-2 backdrop-blur-sm sm:h-auto sm:px-2.5 sm:py-1 sm:gap-1.5">
-              <Hexagon size={12} className="text-purple-400 sm:size-[18px]" />
-              <NumberTicker value={progress.kodeScore} className="text-[10px] font-semibold text-zinc-50 sm:text-sm tabular-nums" />
-            </div>
-            <div className="flex h-4 items-center gap-1 rounded-full bg-zinc-900/80 px-2 backdrop-blur-sm sm:h-auto sm:px-2.5 sm:py-1 sm:gap-1.5">
-              <Flame size={12} className="text-orange-500 sm:size-[18px]" />
-              <span className="text-[10px] font-semibold text-zinc-50 sm:text-sm">
-                {progress.streak}
-              </span>
-            </div>
+          <div className="flex h-9 items-center gap-1.5 rounded-full bg-zinc-900/80 px-2.5 backdrop-blur-sm sm:h-10 sm:px-3 sm:gap-2">
+            <Flame size={16} className="text-orange-500 sm:size-5" />
+            <span className="text-[11px] font-semibold text-zinc-50 sm:text-sm tabular-nums">
+              {progress.streak}
+            </span>
           </div>
           <button
             onClick={() => setShowSettings(true)}
@@ -684,6 +676,7 @@ export default function Home() {
           fullName={profileDisplayName}
           email={user.email ?? undefined}
           provider={user.identities?.[0]?.provider ?? user.app_metadata?.provider}
+          kodeScore={progress.kodeScore}
           onClose={() => setShowProfileCard(false)}
         />
       )}

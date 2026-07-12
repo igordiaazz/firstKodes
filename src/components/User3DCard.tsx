@@ -3,14 +3,16 @@
 import { motion } from 'framer-motion';
 import { useRef, useState, type ElementType } from 'react';
 import { useTranslations } from 'next-intl';
-import { Github } from 'lucide-react';
+import { Github, Hexagon } from 'lucide-react';
 import { GlareCard } from '@/components/ui/glare-card';
+import { NumberTicker } from '@/components/ui/number-ticker';
 
 interface User3DCardProps {
   displayName: string;
   fullName: string;
   email?: string;
   provider?: string;
+  kodeScore: number;
   onClose: () => void;
 }
 
@@ -58,6 +60,7 @@ export default function User3DCard({
   fullName,
   email,
   provider,
+  kodeScore,
   onClose,
 }: User3DCardProps) {
   const t = useTranslations('profile');
@@ -84,7 +87,7 @@ export default function User3DCard({
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xl"
       onClick={onClose}
     >
-      <div onClick={handleCardClick} className="[perspective:800px]">
+      <div onClick={handleCardClick} className="[perspective:800px] flex flex-col items-center">
         <motion.div
           style={{ transformStyle: 'preserve-3d' }}
           animate={{ rotateY: autoRotating ? 360 : 0 }}
@@ -120,7 +123,11 @@ export default function User3DCard({
             </div>
           </GlareCard>
         </motion.div>
-        <p className="mt-4 text-center text-[13px] text-zinc-500">
+        <div className="mt-4 flex w-fit items-center justify-center gap-1.5 rounded-full bg-zinc-900/80 px-2.5 py-1 backdrop-blur-sm">
+          <Hexagon size={14} className="text-purple-400" />
+          <NumberTicker value={kodeScore} className="text-[13px] font-semibold text-zinc-50 tabular-nums" />
+        </div>
+        <p className="mt-3 text-center text-[13px] text-zinc-500">
           {t('clickOutside')}
         </p>
       </div>

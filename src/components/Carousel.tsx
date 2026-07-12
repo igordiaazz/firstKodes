@@ -83,6 +83,15 @@ export default function Carousel({
   const [clickCount, setClickCount] = useState(0);
   const [showAdminPopup, setShowAdminPopup] = useState(false);
   const [adminPassword, setAdminPassword] = useState('');
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 768px)');
+    const update = () => setIsMobile(mq.matches);
+    update();
+    mq.addEventListener('change', update);
+    return () => mq.removeEventListener('change', update);
+  }, []);
 
   useEffect(() => {
     setActiveIndex((prev) => Math.min(prev, modules.length - 1));
@@ -166,6 +175,12 @@ export default function Carousel({
     <div className="relative w-full mt-16 md:mt-24">
       <div
         className="carousel-fade h-[460px] md:h-[520px] overflow-hidden relative select-none"
+        style={{
+          maskImage:
+            'linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%)',
+          WebkitMaskImage:
+            'linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%)',
+        }}
         onTouchStart={handleDragStart}
         onTouchEnd={handleDragEnd}
         onMouseDown={handleDragStart}
@@ -186,16 +201,19 @@ export default function Carousel({
           let filter = 'blur(0px) brightness(100%)';
 
           if (centerOffset !== 0) {
-            offsetX = (300 + (absOffset - 1) * 70) * direcao;
+            const offsetBase = isMobile
+              ? 150 + (absOffset - 1) * 60
+              : 300 + (absOffset - 1) * 70;
+            offsetX = offsetBase * direcao;
             scale = 0.85 - absOffset * 0.02;
             opacity = 1;
-            filter = 'blur(2px) brightness(85%)';
+            filter = 'blur(2px)';
           }
 
           return (
             <div
               key={mod.id}
-              className="absolute left-1/2 top-1/2 w-[85vw] max-w-[320px] lg:max-w-[400px] h-[440px] md:h-[480px]"
+              className="absolute left-1/2 top-1/2 w-[70vw] max-w-[320px] lg:max-w-[400px] h-[440px] md:h-[480px]"
               style={{
                 transform: `translateX(calc(-50% + ${offsetX}px)) translateY(-50%) scale(${scale})`,
                 zIndex,
@@ -303,6 +321,7 @@ export default function Carousel({
             </div>
           );
         })}
+
       </div>
 
       <p className="text-center text-sm text-zinc-500 mt-6">{t('dragHint')}</p>

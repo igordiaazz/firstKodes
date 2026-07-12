@@ -90,6 +90,9 @@
   "game": {
     "phaseLabel": "Phase {current} of {total}",
     "exit": "Exit",
+    "prevPhase": "Previous phase",
+    "review": "Review",
+    "touchHint": "Tap the underlined words to see what they mean!",
     "outputLabel": "Output:",
     "correct": "Correct!",
     "wrong": "Oops! Try again.",
@@ -98,6 +101,7 @@
     "oopsMascot": "Oops!",
     "nextPhase": "Next phase",
     "verify": "Check",
+    "tryAgain": "Try again",
     "backToMenu": "Back to main menu"
   },
   "boss": {
@@ -159,14 +163,14 @@
     "sparkTitle": "A new day!",
     "instruction": "Swipe up to ignite and activate your streak!",
     "almostThere": "Almost there! Keep going!",
-    "success": "🔥 {count} day streak!",
-    "congratulations": "{count} days of streak!",
+    "success": "🔥 {count, plural, one {{count} day streak!} other {{count} days streak!}}",
+    "congratulations": "{count, plural, one {{count} day of streak!} other {{count} days of streak!}}",
     "tryAgain": "Try again!",
     "continue": "Continue"
   },
   "streakLost": {
     "title": "Your streak burned out!",
-    "subtitle": "You had a streak of {count} days. Every day is a new chance!",
+    "subtitle": "You had a streak of {count, plural, one {{count} day} other {{count} days}}. Every day is a new chance!",
     "continue": "Start new streak"
   },
   "footer": {

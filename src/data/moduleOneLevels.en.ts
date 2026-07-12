@@ -11,6 +11,8 @@ export const moduleOneLevelsEn: LevelData[] = [
     codeSuffix: '("Hello, World!")',
     options: ['show', 'print', 'write'],
     answer: 'print',
+    explanation:
+      'print is the command that displays text on the screen. The quotes delimit the string "Hello, World!".',
   },
   {
     id: 'fase-2',
@@ -22,6 +24,8 @@ export const moduleOneLevelsEn: LevelData[] = [
     codeSuffix: ' "Clippy"',
     options: ['=', '->', 'store'],
     answer: '=',
+    explanation:
+      'The = symbol is the assignment operator: it stores the value "Clippy" inside the variable name.',
   },
   {
     id: 'fase-3',
@@ -33,6 +37,8 @@ export const moduleOneLevelsEn: LevelData[] = [
     codeSuffix: '',
     options: ['"3"', 'three', '3'],
     answer: '3',
+    explanation:
+      'Numbers used in calculations don\'t use quotes. 3 is an integer; "3" would be treated as text.',
   },
   {
     id: 'fase-4',
@@ -44,6 +50,8 @@ export const moduleOneLevelsEn: LevelData[] = [
     codeSuffix: ' = 20',
     options: ['new_point', '20', 'points'],
     answer: 'points',
+    explanation:
+      'To update an existing variable, we repeat its name (points) and assign the new value (20).',
   },
   {
     id: 'fase-5',
@@ -56,5 +64,7 @@ export const moduleOneLevelsEn: LevelData[] = [
     codeSuffix: '',
     options: ['83', '5', '8 - 3'],
     answer: '5',
+    explanation:
+      'print(8 - 3) computes the calculation first and displays the result: 5.',
   },
 ];

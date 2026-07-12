@@ -45,7 +45,7 @@ Cada módulo tem um valor base de pontos por fase de escolha; fases de digitaç�
 | 🏆 Desafios Finais | 4 | 20 | 8 | 28 |
 | **Total geral** | | | | **98** |
 
-Os pontos são acumulados ao longo de toda a jornada e exibidos no cabeçalho com animação (NumberTicker).
+Os pontos são acumulados ao longo de toda a jornada e exibidos no **card de perfil** (ao clicar em Perfil), com animação (NumberTicker). No cabeçalho, permanece visível apenas a **Ofensiva (streak)** em tamanho normal.
 
 ---
 
@@ -64,6 +64,11 @@ Os pontos são acumulados ao longo de toda a jornada e exibidos no cabeçalho co
 - 🌐 **Internacionalização (i18n)** — Suporte a Português e Inglês com roteamento por locale (`/[locale]`) via `next-intl`
 - ⚙️ **Configurações** — Painel com troca de idioma, reset de progresso com confirmação animada (botão cinza → vermelho) e saída da conta
 - 👋 **Tela de Boas-vindas** — Exibida após login com conta ativa: animação sequencial (fade-in/slide-up) com nome e "Membro desde [mês/ano]". Contas novas veem "Bem-vindo! / Aproveite!" sem o "Membro desde". No desktop some sozinha em 5s; no mobile fecha ao tocar em "Continuar"
+- 🔙 **Revisão entre Fases** — Botão de fase anterior no cabeçalho para voltar e revisar fases já feitas; ao revisitá-las entra em **modo revisão** (selo "Revisão"), sem conceder pontos ou alterar o progresso salvo. Navegação suave com animação de entrada a cada fase
+- 💡 **Explicação ao Acertar** — Ao acertar, um popup desliza de baixo (≈25% da tela, verde/vermelho) com a explicação do "porquê está correto" e o botão de avanço. O conteúdo rola internamente, sem scrollbar da janela
+- 📖 **Tooltips de Termos** — Palavras sublinhadas abrem a definição; o tooltip vira para cima/baixo e se posiciona para **sempre ficar dentro da tela** (mobile incluso)
+- 🎠 **Carrossel de Módulos** — Navegação intuitiva com animações suaves e **peek** do próximo card no mobile (card ativo mais estreito + máscara de fade nas laterais)
+- 🤖 **Dica do Mascote** — O Clippy inclui a dica "Toque nas palavras sublinhadas para saber o que são!"
 - 🎯 **Avanço Manual** — Após acertar, botão "Próxima fase" para avançar no seu ritmo
 - 💜 **Design Responsivo** — Interface adaptada para mobile e desktop com animações suaves entre fases
 
