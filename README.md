@@ -63,6 +63,7 @@ Os pontos são acumulados ao longo de toda a jornada e exibidos no **card de per
 - 🔥 **Sistema de Streak (Ofensiva)** — Ao concluir uma fase por dia, a chama cinza se transforma em laranja (cresce e muda de cor) ao "acender" (arraste para cima). Cresce +1 por dia consecutivo e zera se um dia for pulado
 - 🌐 **Internacionalização (i18n)** — Suporte a Português e Inglês com roteamento por locale (`/[locale]`) via `next-intl`
 - ⚙️ **Configurações** — Painel com troca de idioma, reset de progresso com confirmação animada (botão cinza → vermelho) e saída da conta
+- 📋 **Questionário de Onboarding** — Na primeira vez que o usuário cria a conta, uma tela dedicada (estilo fase de módulo no mobile, estilo login no desktop) com 6 perguntas: nível de conhecimento, motivação, tempo diário, meta, momento profissional e "superpoder". A pergunta é digitada caractere a caractere com a palavra-chave em destaque roxo. As respostas são salvas no perfil Supabase e a tela não reaparece. Fluxo: login → onboarding → splash de boas-vindas → menu
 - 👋 **Tela de Boas-vindas** — Exibida após login com conta ativa: animação sequencial (fade-in/slide-up) com nome e "Membro desde [mês/ano]". Contas novas veem "Bem-vindo! / Aproveite!" sem o "Membro desde". No desktop some sozinha em 5s; no mobile fecha ao tocar em "Continuar"
 - 🔙 **Revisão entre Fases** — Botão de fase anterior no cabeçalho para voltar e revisar fases já feitas; ao revisitá-las entra em **modo revisão** (selo "Revisão"), sem conceder pontos ou alterar o progresso salvo. Navegação suave com animação de entrada a cada fase
 - 💡 **Explicação ao Acertar** — Ao acertar, um popup desliza de baixo (≈25% da tela, verde/vermelho) com a explicação do "porquê está correto" e o botão de avanço. O conteúdo rola internamente, sem scrollbar da janela
@@ -142,6 +143,16 @@ npm start
 
 ---
 
+## Banco de Dados (Supabase)
+
+As migrações SQL ficam em `supabase/migrations/`. Para aplicar, rode no SQL Editor do Supabase ou via Supabase CLI:
+
+- `001_initial.sql` — Tabelas `profiles` e `progress` + trigger de criação de perfil no signup
+- `002_streak_date.sql` — Coluna `last_activity_date` na tabela `progress`
+- `003_onboarding.sql` — Colunas `onboarding_completed` (boolean) e `onboarding` (jsonb) na tabela `profiles`, usadas pelo questionário de onboarding
+
+---
+
 ## Deploy na Vercel
 
 O projeto está configurado para deploy na [Vercel](https://vercel.com).
@@ -195,6 +206,7 @@ src/
 │   │   ├── check-code/route.ts         # API de tutoria IA
 │   │   ├── generate-module5/route.ts   # Geração de desafio chefão IA
 │   │   ├── generate-practice/route.ts  # Geração de exercícios IA
+│   │   ├── onboarding/route.ts          # API do questionário de onboarding (GET/POST)
 │   │   └── progress/route.ts           # API de progresso do usuário
 │   ├── auth/
 │   │   └── callback/route.ts           # Callback OAuth (troca código por sessão)
@@ -207,7 +219,8 @@ src/
 │   ├── GameLevel.tsx                   # Fase principal (seleção de palavras)
 │   ├── GameLevelEn.ts                  # Fase principal (versão EN)
 │   ├── Mascot.tsx                      # Mascote / Clippy (tutor IA)
-│   ├── Module5Game.tsx                 # Desafio chefão
+│   ├── OnboardingScreen.tsx             # Tela do questionário de onboarding
+│   ├── Module5Game.tsx                  # Desafio chefão
 │   ├── ModuleComplete.tsx              # Tela de módulo concluído
 │   ├── PhaseContainer.tsx              # Container de fases
 │   ├── StreakPending.tsx               # Chama de streak (arraste p/ acender)
@@ -279,6 +292,15 @@ src/
 {
   "moduleName": "Desafio Chefão"
 }
+```
+
+### `GET/POST /api/onboarding`
+
+📋 Gerencia o questionário de onboarding do usuário autenticado no Supabase (tabela `profiles`). `GET` retorna se o onboarding já foi concluído; `POST` salva as respostas e marca como concluído.
+
+```json
+// GET -> { "onboardingCompleted": false, "onboarding": null }
+// POST body -> { "onboarding": { "knowledge": "basic", "motivation": "school", ... } }
 ```
 
 ### `GET/POST /api/progress`

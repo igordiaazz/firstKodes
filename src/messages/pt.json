@@ -51,6 +51,76 @@
     "skip": "Pular",
     "save": "Salvar"
   },
+  "onboarding": {
+    "title": "Vamos nos conhecer!",
+    "subtitle": "Algumas perguntinhas pra deixar sua jornada sob medida",
+    "step": "Pergunta {current} de {total}",
+    "next": "Próximo",
+    "back": "Voltar",
+    "finish": "Começar!",
+    "skip": "Pular por agora",
+    "saving": "Salvando...",
+    "questions": {
+      "knowledge": {
+        "title": "Qual seu conhecimento em programação?",
+        "highlight": "programação",
+        "options": {
+          "basic": "Básico",
+          "intermediate": "Intermediário",
+          "advanced": "Avançado"
+        }
+      },
+      "motivation": {
+        "title": "O que te motivou a começar?",
+        "highlight": "motivou",
+        "options": {
+          "school": "Escola",
+          "hobby": "Hobby",
+          "work": "Trabalho",
+          "curiosity": "Curiosidade"
+        }
+      },
+      "time": {
+        "title": "Quanto tempo você pretende se dedicar por dia?",
+        "highlight": "tempo",
+        "options": {
+          "casual": "Casual (5 minutos/dia)",
+          "focused": "Focado (15 minutos/dia)",
+          "intensive": "Intensivo (30+ minutos/dia)"
+        }
+      },
+      "goal": {
+        "title": "Qual é a sua principal meta ao aprender a programar?",
+        "highlight": "meta",
+        "options": {
+          "sites": "Criar sites e aplicativos",
+          "games": "Desenvolver jogos",
+          "data": "Analisar dados ou inteligência artificial",
+          "automate": "Automatizar tarefas do dia a dia",
+          "brain": "Apenas exercitar o cérebro"
+        }
+      },
+      "moment": {
+        "title": "Em que momento profissional você está?",
+        "highlight": "profissional",
+        "options": {
+          "student": "Estudante (Ensino Médio/Faculdade)",
+          "transition": "Buscando transição de carreira para TI",
+          "tech": "Já trabalho com tecnologia, mas quero aprender mais",
+          "exploring": "Apenas explorando um novo hobby"
+        }
+      },
+      "superpower": {
+        "title": "Se a programação fosse um superpoder, qual você escolheria?",
+        "highlight": "superpoder",
+        "options": {
+          "frontend": "Criar coisas bonitas do zero (Front-end)",
+          "backend": "Fazer sistemas funcionarem nos bastidores (Back-end)",
+          "fullstack": "OS DOIS (FULLSTACK)"
+        }
+      }
+    }
+  },
   "modules": {
     "fundamentos": {
       "title": "Fundamentos",

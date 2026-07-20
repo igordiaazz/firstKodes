@@ -50,6 +50,76 @@
     "skip": "Skip",
     "save": "Save"
   },
+  "onboarding": {
+    "title": "Let's get to know you!",
+    "subtitle": "A few quick questions to tailor your journey",
+    "step": "Question {current} of {total}",
+    "next": "Next",
+    "back": "Back",
+    "finish": "Get started!",
+    "skip": "Skip for now",
+    "saving": "Saving...",
+    "questions": {
+      "knowledge": {
+        "title": "What's your programming knowledge?",
+        "highlight": "programming",
+        "options": {
+          "basic": "Basic",
+          "intermediate": "Intermediate",
+          "advanced": "Advanced"
+        }
+      },
+      "motivation": {
+        "title": "What motivated you to start?",
+        "highlight": "motivated",
+        "options": {
+          "school": "School",
+          "hobby": "Hobby",
+          "work": "Work",
+          "curiosity": "Curiosity"
+        }
+      },
+      "time": {
+        "title": "How much time do you plan to dedicate per day?",
+        "highlight": "time",
+        "options": {
+          "casual": "Casual (5 min/day)",
+          "focused": "Focused (15 min/day)",
+          "intensive": "Intensive (30+ min/day)"
+        }
+      },
+      "goal": {
+        "title": "What's your main goal when learning to code?",
+        "highlight": "goal",
+        "options": {
+          "sites": "Build websites and apps",
+          "games": "Develop games",
+          "data": "Analyze data or artificial intelligence",
+          "automate": "Automate everyday tasks",
+          "brain": "Just exercise my brain"
+        }
+      },
+      "moment": {
+        "title": "What's your current professional moment?",
+        "highlight": "professional",
+        "options": {
+          "student": "Student (High School/College)",
+          "transition": "Looking to transition into tech",
+          "tech": "I already work with tech but want to learn more",
+          "exploring": "Just exploring a new hobby"
+        }
+      },
+      "superpower": {
+        "title": "If coding were a superpower, which would you pick?",
+        "highlight": "superpower",
+        "options": {
+          "frontend": "Create beautiful things from scratch (Front-end)",
+          "backend": "Make systems work behind the scenes (Back-end)",
+          "fullstack": "BOTH (FULLSTACK)"
+        }
+      }
+    }
+  },
   "modules": {
     "fundamentos": {
       "title": "Fundamentals",

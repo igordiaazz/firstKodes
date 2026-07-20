@@ -28,6 +28,7 @@ import Module5Game from '@/components/Module5Game';
 import StreakPending from '@/components/StreakPending';
 import StreakLost from '@/components/StreakLost';
 import WelcomeSplash from '@/components/WelcomeSplash';
+import OnboardingScreen from '@/components/OnboardingScreen';
 import ModuleComplete from '@/components/ModuleComplete';
 import { moduleOneLevels } from '@/data/moduleOneLevels';
 import { moduleOneLevelsEn } from '@/data/moduleOneLevels.en';
@@ -213,8 +214,12 @@ export default function Home() {
   const [activeModuleId, setActiveModuleId] = useState<string | null>(null);
   const [showSettings, setShowSettings] = useState(false);
   const [confirmingReset, setConfirmingReset] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [onboardingSaving, setOnboardingSaving] = useState(false);
+  const [onboardingChecked, setOnboardingChecked] = useState(false);
   const [showProfileCard, setShowProfileCard] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
+  const [pendingWelcome, setPendingWelcome] = useState(false);
   const [showStreakLost, setShowStreakLost] = useState(false);
   const [lostStreakCount, setLostStreakCount] = useState(0);
   const [elapsedTime, setElapsedTime] = useState<number | null>(null);
@@ -404,10 +409,53 @@ export default function Home() {
     if (user && !authLoading) {
       const params = new URLSearchParams(window.location.search);
       if (params.get('welcome') === '1') {
-        setShowWelcome(true);
+        setPendingWelcome(true);
       }
     }
   }, [user, authLoading]);
+
+  useEffect(() => {
+    if (pendingWelcome && !showOnboarding) {
+      setShowWelcome(true);
+      setPendingWelcome(false);
+    }
+  }, [pendingWelcome, showOnboarding]);
+
+  useEffect(() => {
+    if (!user || !isConfigured || authLoading || onboardingChecked) return;
+    const checkOnboarding = async () => {
+      try {
+        const res = await fetch('/api/onboarding', { cache: 'no-store' });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!data.onboardingCompleted) {
+          setShowOnboarding(true);
+        }
+      } catch {
+      } finally {
+        setOnboardingChecked(true);
+      }
+    };
+    checkOnboarding();
+  }, [user, isConfigured, authLoading, onboardingChecked]);
+
+  const handleOnboardingComplete = useCallback(
+    async (answers: Record<string, string>) => {
+      setOnboardingSaving(true);
+      try {
+        await fetch('/api/onboarding', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ onboarding: answers }),
+        });
+      } catch {
+      } finally {
+        setOnboardingSaving(false);
+        setShowOnboarding(false);
+      }
+    },
+    [],
+  );
 
   const [customName, setCustomName] = useState<string | null>(null);
   const [showNameModal, setShowNameModal] = useState(false);
@@ -770,6 +818,13 @@ export default function Home() {
           />
         )}
       </AnimatePresence>
+
+      <OnboardingScreen
+        open={showOnboarding}
+        saving={onboardingSaving}
+        onClose={() => setShowOnboarding(false)}
+        onComplete={handleOnboardingComplete}
+      />
 
     </main>
   );
